@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Neural Network - Camera Fix</title>
+    
+    <!-- Tải Font Sci-fi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <!-- Tải MediaPipe (Global Scripts) -->
+    <!-- Lưu ý: Chỉ tải các file logic cốt lõi, bỏ qua camera_utils vì ta sẽ tự viết code camera -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+            font-family: 'Orbitron', sans-serif;
+            color: #00f3ff;
+            user-select: none;
+        }
+
+        /* Scanline Effect */
+        .scanline-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Video Input (Hidden but active) */
+        #input-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 240px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #fff;
+            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+            letter-spacing: 5px;
+            font-weight: 900;
+        }
+        
+        .subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            color: #bc13fe;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* Tech Panel */
+        .status-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            background: rgba(0, 10, 20, 0.85);
+            border: 1px solid #00f3ff;
+            padding: 20px;
+            pointer-events: auto;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+
+        .status-item {
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            color: #00f3ff;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .status-value {
+            color: #fff;
+            margin-left: 10px;
+        }
+        
+        .upload-btn {
+            background: transparent;
+            border: 1px solid #bc13fe;
+            color: #bc13fe;
+            padding: 8px 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            width: 100%;
+            margin-top: 10px;
+            pointer-events: auto;
+        }
+
+        .upload-btn:hover {
+            background: #bc13fe;
+            color: #000;
+            box-shadow: 0 0 15px #bc13fe;
+        }
+
+        /* Loading & Error UI */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.5s;
+        }
+
+        .loader-text {
+            font-size: 1.5rem;
+            color: #00f3ff;
+            font-family: 'Share Tech Mono';
+            margin-bottom: 20px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .btn-tech {
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #111;
+            border: 1px solid #00f3ff;
+            color: #00f3ff;
+            cursor: pointer;
+            font-family: 'Share Tech Mono';
+            font-size: 1rem;
+            pointer-events: auto;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            display: none; /* Hidden by default */
+        }
+        .btn-tech:hover { background: #00f3ff; color: #000; }
+        .btn-tech.visible { display: block; }
+
+        #error-msg { 
+            color: #ff0055; 
+            margin-top: 10px; 
+            font-family: 'Share Tech Mono'; 
+            max-width: 80%;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .gesture-guide {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: right;
+            pointer-events: auto;
+        }
+
+        .guide-item {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-right: 3px solid #bc13fe;
+            color: #fff;
+            font-size: 0.7rem;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        #webcam-preview-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 160px;
+            height: 120px;
+            border: 2px solid #00f3ff;
+            overflow: hidden;
+            z-index: 20;
+            pointer-events: auto;
+            background: #000;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+        }
+        
+        #webcam-canvas {
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            /* Bỏ filter xám để dễ debug xem camera có lên hình không */
+            /* filter: contrast(1.2) grayscale(1); */ 
+        }
+
+        .fade-out { opacity: 0; pointer-events: none; }
+    </style>
+
+    <!-- Three.js Imports -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+                "tween": "https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.esm.min.js"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div class="scanline-overlay"></div>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loader-text">INITIALIZING...</div>
+        <div id="error-msg"></div>
+        <button id="start-cam-btn" class="btn-tech" onclick="startCamera()">ACTIVATE CAMERA</button>
+        <button id="manual-start-btn" class="btn-tech" onclick="forceManual()">MANUAL MODE (NO CAM)</button>
+    </div>
+
+    <!-- Video Source (Quan trọng: playsinline, muted, autoplay) -->
+    <video id="input-video" playsinline muted autoplay></video>
+
+    <!-- UI -->
+    <div id="ui-layer">
+        <div class="header">
+            <h1>NEURAL TREE</h1>
+            <div class="subtitle">SYSTEM ONLINE</div>
+        </div>
+
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="icon">SYS</span>
+                <span class="status-value" id="ai-status">WAITING...</span>
+            </div>
+            <div class="status-item">
+                <span class="icon">MODE</span>
+                <span class="status-value" id="current-mode">CONVERGENCE</span>
+            </div>
+            <hr style="border-color: #00f3ff; opacity: 0.3;">
+            <p style="margin: 5px 0; font-size: 0.7rem; color: #bc13fe; font-family: 'Share Tech Mono';">DATA UPLOAD:</p>
+            <input type="file" id="image-upload" accept="image/*" multiple style="display: none;">
+            <button class="upload-btn" onclick="document.getElementById('image-upload').click()">
+                UPLOAD FILES
+            </button>
+        </div>
+
+        <div class="gesture-guide">
+            <div class="guide-item">✊ FIST :: RESET</div>
+            <div class="guide-item">🖐 PALM :: GALAXY</div>
+            <div class="guide-item">👋 WAVE :: ROTATE</div>
+            <div class="guide-item">👌 PINCH :: ZOOM</div>
+        </div>
+    </div>
+
+    <div id="webcam-preview-container">
+        <canvas id="webcam-canvas"></canvas>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import TWEEN from 'tween';
+
+        // --- GLOBAL EXPORTS FOR HTML BUTTONS ---
+        window.startCamera = async function() {
+            document.getElementById('error-msg').innerText = "REQUESTING ACCESS...";
+            await initCameraDirectly();
+        };
+
+        window.forceManual = function() {
+            document.getElementById('loading').classList.add('fade-out');
+            document.getElementById('ai-status').innerText = "MANUAL MODE";
+            document.getElementById('ai-status').style.color = "yellow";
+            isManualMode = true;
+        };
+        
+        // --- CONFIG ---
+        const CONFIG = {
+            colors: {
+                cyan: 0x00f3ff,
+                purple: 0xbc13fe,
+                green: 0x00ff41,
+                white: 0xffffff
+            },
+            particles: { count: 1800, size: 0.1 },
+            tree: { height: 18, radius: 8 }
+        };
+
+        const STATE = {
+            mode: 'TREE', 
+            targetRotation: { x: 0, y: 0 },
+            isHandDetected: false
+        };
+
+        let isManualMode = false;
+        let hands = null;
+
+        // --- SCENE SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020202);
+        scene.fog = new THREE.FogExp2(0x020202, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 30);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // --- OBJECTS ---
+        const gridHelper = new THREE.GridHelper(200, 50, CONFIG.colors.cyan, 0x111111);
+        gridHelper.position.y = -10;
+        scene.add(gridHelper);
+
+        const gridHelperTop = new THREE.GridHelper(200, 50, CONFIG.colors.purple, 0x111111);
+        gridHelperTop.position.y = 20;
+        gridHelperTop.rotation.x = Math.PI;
+        scene.add(gridHelperTop);
+
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.1; bloomPass.strength = 1.6; bloomPass.radius = 0.5;
+        composer.addPass(bloomPass);
+
+        const geo1 = new THREE.TetrahedronGeometry(0.2, 0);
+        const mat1 = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true }); 
+        const mesh1 = new THREE.InstancedMesh(geo1, mat1, CONFIG.particles.count / 2);
+        
+        const geo2 = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+        const mat2 = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const mesh2 = new THREE.InstancedMesh(geo2, mat2, CONFIG.particles.count / 2);
+
+        scene.add(mesh1); scene.add(mesh2);
+
+        const dummy = new THREE.Object3D();
+        const particles = [];
+
+        for (let i = 0; i < CONFIG.particles.count; i++) {
+            const h = Math.random();
+            const theta = i * 0.15 + Math.random(); 
+            const r = (1 - h) * CONFIG.tree.radius + Math.random();
+            const xTree = r * Math.cos(theta);
+            const yTree = (h * CONFIG.tree.height) - (CONFIG.tree.height / 2);
+            const zTree = r * Math.sin(theta);
+
+            const rG = 15 + Math.random() * 15;
+            const thetaG = Math.random() * Math.PI * 2;
+            const phiG = Math.acos(2 * Math.random() - 1);
+            const xG = rG * Math.sin(phiG) * Math.cos(thetaG);
+            const yG = rG * Math.sin(phiG) * Math.sin(thetaG);
+            const zG = rG * Math.cos(phiG);
+
+            const color = new THREE.Color();
+            const rnd = Math.random();
+            if (rnd < 0.4) color.setHex(CONFIG.colors.cyan);
+            else if (rnd < 0.7) color.setHex(CONFIG.colors.purple);
+            else color.setHex(CONFIG.colors.green);
+
+            const isGroup1 = i < CONFIG.particles.count / 2;
+            const targetMesh = isGroup1 ? mesh1 : mesh2;
+            const indexInMesh = isGroup1 ? i : i - (CONFIG.particles.count/2);
+
+            targetMesh.setColorAt(indexInMesh, color);
+            
+            particles.push({
+                mesh: targetMesh, index: indexInMesh,
+                treePos: new THREE.Vector3(xTree, yTree, zTree),
+                dispPos: new THREE.Vector3(xG, yG, zG),
+                currPos: new THREE.Vector3(xTree, yTree, zTree),
+                rotationSpeed: Math.random() * 0.1
+            });
+            dummy.position.set(xTree, yTree, zTree);
+            dummy.scale.setScalar(Math.random() * 0.8 + 0.2);
+            dummy.updateMatrix();
+            targetMesh.setMatrixAt(indexInMesh, dummy.matrix);
+        }
+        mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
+        mesh1.instanceColor.needsUpdate = true; mesh2.instanceColor.needsUpdate = true;
+
+        const photoGroup = new THREE.Group();
+        scene.add(photoGroup);
+        const photos = [];
+
+        function createHoloFrame(texture) {
+            const size = 3.5;
+            const geo = new THREE.PlaneGeometry(size, size);
+            const mat = new THREE.MeshBasicMaterial({
+                map: texture, transparent: true, opacity: 0.85,
+                side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            const edgeGeo = new THREE.EdgesGeometry(geo);
+            const edgeMat = new THREE.LineBasicMaterial({ color: CONFIG.colors.cyan, transparent: true, opacity: 0.6 });
+            mesh.add(new THREE.LineSegments(edgeGeo, edgeMat));
+
+            const h = Math.random(); const theta = Math.random() * Math.PI * 2;
+            const r = (1 - h) * (CONFIG.tree.radius + 2);
+            const x = r * Math.cos(theta); const y = (h * CONFIG.tree.height) - (CONFIG.tree.height / 2); const z = r * Math.sin(theta);
+            
+            const rG = 20 + Math.random() * 5;
+            const thetaG = Math.random() * Math.PI * 2; const phiG = Math.acos(2 * Math.random() - 1);
+            const xG = rG * Math.sin(phiG) * Math.cos(thetaG); const yG = rG * Math.sin(phiG) * Math.sin(thetaG); const zG = rG * Math.cos(phiG);
+
+            mesh.position.set(x, y, z); mesh.lookAt(0,0,0);
+            photoGroup.add(mesh);
+            photos.push({ mesh: mesh, treePos: new THREE.Vector3(x, y, z), dispPos: new THREE.Vector3(xG, yG, zG), isZoomed: false });
+        }
+
+        function createTechCanvas(label, colorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = "rgba(0, 10, 20, 0.9)"; ctx.fillRect(0,0,256,256);
+            ctx.strokeStyle = colorHex; ctx.lineWidth = 1;
+            for(let i=0; i<256; i+=32){
+                ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,256); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(256,i); ctx.stroke();
+            }
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 28px Courier New"; ctx.textAlign = "center";
+            ctx.fillText("DATA NODE", 128, 110);
+            ctx.fillStyle = colorHex; ctx.font = "bold 40px Courier New";
+            ctx.fillText(label, 128, 160);
+            ctx.lineWidth = 4; ctx.strokeRect(4,4,248,248);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        ["ALPHA", "BETA", "GAMMA", "CORE", "NET", "SYS"].forEach((lbl, i) => {
+            createHoloFrame(createTechCanvas(lbl, i % 2 === 0 ? "#00f3ff" : "#bc13fe"));
+        });
+
+        // --- CAMERA & AI LOGIC (DIRECT IMPLEMENTATION) ---
+        const videoElement = document.getElementById('input-video');
+        const canvasWebcam = document.getElementById('webcam-canvas');
+        const ctxWebcam = canvasWebcam.getContext('2d');
+
+        // Step 1: Initialize MediaPipe Hands
+        async function setupHands() {
+            if (!window.Hands) return false;
+            hands = new window.Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 0, // Lite model for speed/stability
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            hands.onResults(onAIResults);
+            await hands.initialize();
+            return true;
+        }
+
+        // Step 2: Initialize Camera Stream
+        async function initCameraDirectly() {
+            try {
+                // Initialize Hands first
+                if (!hands) {
+                    const success = await setupHands();
+                    if (!success) throw new Error("MediaPipe not loaded");
+                }
+
+                // Get Stream
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 320, height: 240, facingMode: 'user' }
+                });
+                
+                videoElement.srcObject = stream;
+                
+                // Wait for video to be ready
+                await new Promise((resolve) => {
+                    videoElement.onloadedmetadata = () => {
+                        videoElement.play();
+                        resolve();
+                    };
+                });
+
+                document.getElementById('loading').classList.add('fade-out');
+                document.getElementById('ai-status').innerText = "ONLINE";
+                document.getElementById('ai-status').style.color = "#00ff41";
+                
+                // Start Prediction Loop
+                predictWebcam();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('error-msg').innerText = "CAMERA ACCESS DENIED or ERROR.";
+                document.getElementById('start-cam-btn').classList.add('visible');
+                document.getElementById('manual-start-btn').classList.add('visible');
+            }
+        }
+
+        // Step 3: Loop for Prediction
+        async function predictWebcam() {
+            if (isManualMode) return;
+
+            // Only send if video has valid data
+            if (videoElement.currentTime > 0 && videoElement.videoWidth > 0 && !videoElement.paused && !videoElement.ended) {
+                try {
+                    await hands.send({image: videoElement});
+                } catch (e) {
+                    console.warn("Frame dropped", e);
+                }
+            }
+            requestAnimationFrame(predictWebcam);
+        }
+
+        // Step 4: Draw Results
+        function onAIResults(results) {
+            ctxWebcam.clearRect(0, 0, canvasWebcam.width, canvasWebcam.height);
+            // Draw image
+            ctxWebcam.drawImage(results.image, 0, 0, canvasWebcam.width, canvasWebcam.height);
+            // Draw overlay
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const lm = results.multiHandLandmarks[0];
+                if (window.drawConnectors) window.drawConnectors(ctxWebcam, lm, window.HAND_CONNECTIONS, {color: '#00f3ff', lineWidth: 2});
+                if (window.drawLandmarks) window.drawLandmarks(ctxWebcam, lm, {color: '#bc13fe', lineWidth: 1});
+                
+                processGestures(lm);
+                document.getElementById('ai-status').innerText = "TRACKING ACTIVE";
+                STATE.isHandDetected = true;
+            } else {
+                STATE.isHandDetected = false;
+            }
+        }
+
+        // Try auto-start
+        setTimeout(() => {
+            initCameraDirectly();
+        }, 1000);
+
+
+        // --- GESTURE LOGIC ---
+        function processGestures(lm) {
+            const dist = (i, j) => Math.hypot(lm[i].x - lm[j].x, lm[i].y - lm[j].y);
+            let open = 0;
+            [8,12,16,20].forEach(tip => { if(lm[tip].y < lm[tip-2].y) open++; });
+            if(dist(4,9) > dist(3,9)) open++;
+            const isPinch = dist(4,8) < 0.05;
+
+            if(isPinch && STATE.mode !== 'ZOOM') zoomPhoto();
+            else if(open <= 1 && !isPinch) setMode('TREE');
+            else if(open >= 4) {
+                if(STATE.mode === 'TREE') setMode('DISPERSED');
+                STATE.targetRotation.x = (lm[9].y - 0.5) * 2;
+                STATE.targetRotation.y = (lm[9].x - 0.5) * 2;
+            }
+        }
+
+        function setMode(mode) {
+            if(STATE.mode === mode && mode !== 'ZOOM') return;
+            if(STATE.mode === 'ZOOM') new TWEEN.Tween(camera.position).to({x:0, y:0, z:30}, 1000).easing(TWEEN.Easing.Cubic.Out).start();
+
+            STATE.mode = mode;
+            document.getElementById('current-mode').innerText = mode === 'TREE' ? 'CONVERGENCE' : mode === 'DISPERSED' ? 'UNIVERSE' : 'ANALYSIS';
+
+            const dur = 1200;
+            const easing = TWEEN.Easing.Exponential.InOut;
+
+            particles.forEach(p => {
+                const target = mode === 'TREE' ? p.treePos : p.dispPos;
+                new TWEEN.Tween(p.currPos).to({x:target.x, y:target.y, z:target.z}, dur + Math.random()*500).easing(easing)
+                    .onUpdate(() => {
+                        dummy.position.copy(p.currPos);
+                        dummy.rotation.x += p.rotationSpeed; dummy.rotation.y += p.rotationSpeed;
+                        dummy.updateMatrix();
+                        p.mesh.setMatrixAt(p.index, dummy.matrix);
+                    }).start();
+            });
+
+            photos.forEach(p => {
+                p.isZoomed = false;
+                const target = mode === 'TREE' ? p.treePos : p.dispPos;
+                new TWEEN.Tween(p.mesh.position).to({x:target.x, y:target.y, z:target.z}, dur).easing(easing)
+                    .onUpdate(() => {
+                        if(mode === 'TREE') p.mesh.lookAt(0,0,0); else p.mesh.rotation.set(0,0,0);
+                    }).start();
+                new TWEEN.Tween(p.mesh.scale).to({x:1, y:1, z:1}, dur).start();
+            });
+
+            if(mode === 'TREE') new TWEEN.Tween(camera.position).to({x:0, y:0, z:30}, dur).easing(easing).start();
+        }
+
+        function zoomPhoto() {
+            if(photos.length === 0 || STATE.mode === 'ZOOM') return;
+            const target = photos[Math.floor(Math.random() * photos.length)];
+            STATE.mode = 'ZOOM';
+            document.getElementById('current-mode').innerText = "DATA ZOOM";
+            target.isZoomed = true;
+            const camPos = camera.position.clone();
+            const direction = new THREE.Vector3(); camera.getWorldDirection(direction);
+            const dest = camPos.clone().add(direction.multiplyScalar(8));
+            new TWEEN.Tween(target.mesh.position).to({x:dest.x, y:dest.y, z:dest.z}, 800).easing(TWEEN.Easing.Back.Out)
+                .onUpdate(() => target.mesh.lookAt(camera.position)).start();
+            new TWEEN.Tween(target.mesh.scale).to({x:3, y:3, z:3}, 800).start();
+        }
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+            TWEEN.update();
+            mesh1.rotation.y = time * 0.1; mesh2.rotation.y = time * -0.05;
+            gridHelper.position.z = (time * 5) % 50; gridHelperTop.position.z = (time * 5) % 50;
+
+            if(STATE.mode === 'DISPERSED' && STATE.isHandDetected) {
+                camera.position.x += (STATE.targetRotation.y * 40 - camera.position.x) * 0.05;
+                camera.position.y += (-STATE.targetRotation.x * 25 - camera.position.y) * 0.05;
+                camera.lookAt(0,0,0);
+            } else if(STATE.mode === 'TREE') {
+                scene.rotation.y = Math.sin(time * 0.2) * 0.2;
+            }
+
+            bloomPass.strength = 1.6 + Math.sin(time * 2.5) * 0.4;
+            mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
+            composer.render();
+        }
+        animate();
+
+        // Upload Handler
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if(!files.length) return;
+            while(photoGroup.children.length > 0) photoGroup.remove(photoGroup.children[0]);
+            photos.length = 0;
+            files.forEach(f => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.src = ev.target.result;
+                    img.onload = () => {
+                        const tex = new THREE.Texture(img);
+                        tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
+                        createHoloFrame(tex);
+                    }
+                }
+                reader.readAsDataURL(f);
+            });
+            setTimeout(() => setMode('DISPERSED'), 500);
+        });
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
