@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberpunk Christmas - Galaxy Edition</title>
+    <title>Cyberpunk Christmas - Merry Christmas</title>
     
     <!-- Tải Font Sci-fi, Font dễ đọc & Font Giáng Sinh (Playball) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,7 +175,7 @@
                 <img src="https://i.postimg.cc/c4wS7FNX/Chat-GPT-Image-16-18-40-3-thg-12-2025.png" alt="Cyber Logo" class="header-logo">
                 <h1>MULTIVERSE TREE</h1>
             </div>
-            <div class="subtitle">GALAXY EDITION</div>
+            <div class="subtitle">MERRY CHRISTMAS</div>
         </div>
 
         <div class="status-panel">
@@ -245,13 +245,13 @@
                 lime: 0xccff00,
                 deepBlue: 0x2200ff,
                 gold: 0xFFD700,    // Màu vàng giáng sinh
-                red: 0xFF0033      // Màu đỏ giáng sinh
+                red: 0xFF0033,     // Màu đỏ giáng sinh
+                neonBlue: 0x00ccff // Màu xanh dương mới cho chữ
             },
-            // TĂNG SỐ LƯỢNG HẠT LÊN 10.000 ĐỂ CHỮ DÀY DẶN HƠN
-            particles: { count: 10000, size: 0.1 }, 
+            particles: { count: 6500, size: 0.1 }, 
             tree: { height: 18, radius: 8 },
-            snowCount: 800,
-            meteorCount: 30
+            snowCount: 1200, 
+            meteorCount: 40
         };
 
         const STATE = {
@@ -281,15 +281,16 @@
         const composer = new EffectComposer(renderer);
         composer.addPass(new RenderPass(scene, camera));
         
+        // GIẢM ĐỘ CHÓI (BLOOM) TẠI ĐÂY
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1; 
-        bloomPass.strength = 1.6; 
-        bloomPass.radius = 0.5;
+        bloomPass.threshold = 0.2;  // Tăng ngưỡng lên để ít điểm bị chói hơn (0.1 -> 0.2)
+        bloomPass.strength = 0.6;   // Giảm độ mạnh xuống (1.6 -> 0.6)
+        bloomPass.radius = 0.3;     // Giảm bán kính lan toả (0.5 -> 0.3)
         composer.addPass(bloomPass);
 
         // --- BACKGROUND: NEBULA & STARS ---
         const starGeo = new THREE.BufferGeometry();
-        const starCount = 3000;
+        const starCount = 4000;
         const starPos = new Float32Array(starCount * 3);
         for(let i=0; i<starCount; i++) {
             const r = 100 + Math.random() * 200;
@@ -304,43 +305,301 @@
         const starField = new THREE.Points(starGeo, starMat);
         scene.add(starField);
 
-        // --- SPECIAL TEXT GENERATION FUNCTION (HIGH RES) ---
-        function generateTextParticles(text1, text2) {
+        // --- NEBULA CLOUDS ---
+        const nebulaCount = 60;
+        const nebulaGeo = new THREE.BufferGeometry();
+        const nebulaPos = new Float32Array(nebulaCount * 3);
+        const nebulaColors = new Float32Array(nebulaCount * 3);
+        
+        for(let i=0; i<nebulaCount; i++) {
+            const r = 60 + Math.random() * 60;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+            nebulaPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            nebulaPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+            nebulaPos[i*3+2] = r * Math.cos(phi);
+
+            const c = new THREE.Color();
+            const rnd = Math.random();
+            if(rnd < 0.33) c.setHex(CONFIG.colors.purple);
+            else if(rnd < 0.66) c.setHex(CONFIG.colors.deepBlue);
+            else c.setHex(CONFIG.colors.magenta);
+            
+            nebulaColors[i*3] = c.r; nebulaColors[i*3+1] = c.g; nebulaColors[i*3+2] = c.b;
+        }
+        nebulaGeo.setAttribute('position', new THREE.BufferAttribute(nebulaPos, 3));
+        nebulaGeo.setAttribute('color', new THREE.BufferAttribute(nebulaColors, 3));
+
+        function createSoftGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            const grd = ctx.createRadialGradient(16,16,0, 16,16,16);
+            grd.addColorStop(0, "rgba(255,255,255,1)");
+            grd.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = grd; ctx.fillRect(0,0,32,32);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const nebulaMat = new THREE.PointsMaterial({
+            size: 20, vertexColors: true, map: createSoftGlowTexture(),
+            transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        const nebulaSystem = new THREE.Points(nebulaGeo, nebulaMat);
+        scene.add(nebulaSystem);
+
+        // --- DISTANT GALAXIES ---
+        function createDistantGalaxy(radius, color, x, y, z, rotX, rotY) {
+            const pointsCount = 600;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(pointsCount * 3);
+            const cols = new Float32Array(pointsCount * 3);
+            const baseColor = new THREE.Color(color);
+
+            for(let i=0; i<pointsCount; i++) {
+                const angle = i * 0.1;
+                const dist = (i / pointsCount) * radius;
+                pos[i*3] = Math.cos(angle) * dist + (Math.random()-0.5);
+                pos[i*3+1] = (Math.random()-0.5) * 0.5;
+                pos[i*3+2] = Math.sin(angle) * dist + (Math.random()-0.5);
+
+                cols[i*3] = baseColor.r; cols[i*3+1] = baseColor.g; cols[i*3+2] = baseColor.b;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+            const mat = new THREE.PointsMaterial({size: 0.3, vertexColors: true, transparent: true, opacity: 0.6});
+            const mesh = new THREE.Points(geo, mat);
+            mesh.position.set(x, y, z);
+            mesh.rotation.x = rotX;
+            mesh.rotation.y = rotY;
+            return mesh;
+        }
+
+        const galaxyGroup = new THREE.Group();
+        const galaxies = [];
+        const galaxyColors = [CONFIG.colors.cyan, CONFIG.colors.purple, CONFIG.colors.green, CONFIG.colors.magenta, CONFIG.colors.lime, CONFIG.colors.orange, CONFIG.colors.deepBlue, CONFIG.colors.core];
+
+        for(let i=0; i<15; i++) {
+            const radius = 5 + Math.random() * 20;
+            const color = galaxyColors[Math.floor(Math.random() * galaxyColors.length)];
+            const dist = 80 + Math.random() * 100;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+            const x = dist * Math.sin(phi) * Math.cos(theta);
+            const y = dist * Math.sin(phi) * Math.sin(theta);
+            const z = dist * Math.cos(phi) - 30; 
+            const rotX = Math.random() * Math.PI;
+            const rotY = Math.random() * Math.PI;
+            const g = createDistantGalaxy(radius, color, x, y, z, rotX, rotY);
+            g.userData = { rotSpeedZ: (Math.random() - 0.5) * 0.005 };
+            galaxyGroup.add(g);
+            galaxies.push(g);
+        }
+        scene.add(galaxyGroup);
+
+        // --- THÊM MỚI: CYBER SANTA & REINDEER (ÔNG GIÀ NOEL VÀ TUẦN LỘC) ---
+        const santaGroup = new THREE.Group();
+        scene.add(santaGroup);
+
+        // Hàm tạo một con tuần lộc chi tiết
+        function buildCyberReindeer() {
+            const reindeer = new THREE.Group();
+            const skinMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff }); // Màu da Cyber Cyan
+            const antlerMat = new THREE.MeshBasicMaterial({ color: 0xffffff }); // Màu sừng trắng
+
+            // 1. Thân (Body)
+            const bodyGeo = new THREE.BoxGeometry(0.6, 0.7, 1.2);
+            const body = new THREE.Mesh(bodyGeo, skinMat);
+            body.position.y = 0.8;
+            reindeer.add(body);
+
+            // 2. Cổ (Neck)
+            const neckGeo = new THREE.BoxGeometry(0.3, 0.6, 0.4);
+            const neck = new THREE.Mesh(neckGeo, skinMat);
+            neck.position.set(0, 1.2, 0.5); 
+            neck.rotation.x = -Math.PI / 6; // Nghiêng cổ lên
+            reindeer.add(neck);
+
+            // 3. Đầu (Head)
+            const headGeo = new THREE.BoxGeometry(0.35, 0.35, 0.5);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 1.6, 0.8);
+            reindeer.add(head);
+
+            // Mũi đỏ (Red Nose)
+            const noseGeo = new THREE.SphereGeometry(0.08, 8, 8);
+            const noseMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const nose = new THREE.Mesh(noseGeo, noseMat);
+            nose.position.set(0, 1.6, 1.05);
+            reindeer.add(nose);
+
+            // 4. Sừng (Antlers) - Tạo dáng chữ Y
+            const antlerGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.6);
+            
+            const leftAntler = new THREE.Mesh(antlerGeo, antlerMat);
+            leftAntler.position.set(0.15, 1.9, 0.7);
+            leftAntler.rotation.z = -0.5;
+            leftAntler.rotation.x = 0.5;
+            reindeer.add(leftAntler);
+
+            const rightAntler = new THREE.Mesh(antlerGeo, antlerMat);
+            rightAntler.position.set(-0.15, 1.9, 0.7);
+            rightAntler.rotation.z = 0.5;
+            rightAntler.rotation.x = 0.5;
+            reindeer.add(rightAntler);
+
+            // 5. Chân (Legs)
+            const legGeo = new THREE.BoxGeometry(0.15, 0.8, 0.15);
+            const positions = [
+                { x: -0.2, z: 0.4, name: 'FL' }, // Trước trái
+                { x: 0.2, z: 0.4, name: 'FR' },  // Trước phải
+                { x: -0.2, z: -0.4, name: 'BL' }, // Sau trái
+                { x: 0.2, z: -0.4, name: 'BR' }   // Sau phải
+            ];
+
+            positions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeo, skinMat);
+                leg.position.set(pos.x, 0.4, pos.z);
+                // Đánh dấu chân để tạo chuyển động chạy sau này
+                leg.userData = { isLeg: true, initialZ: pos.z, offset: Math.random() };
+                reindeer.add(leg);
+            });
+
+            return reindeer;
+        }
+
+        function createCyberSanta() {
+            // 1. Cỗ xe (Sleigh) - Khối đặc màu đỏ tươi, viền trắng
+            const sleighGeo = new THREE.BoxGeometry(4, 1.5, 2.5);
+            const sleighMat = new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true, opacity: 0.8 }); 
+            const sleigh = new THREE.Mesh(sleighGeo, sleighMat);
+            sleigh.position.set(0, 0, 0);
+            santaGroup.add(sleigh);
+            
+            // Viền sáng cho xe
+            const edgeGeo = new THREE.EdgesGeometry(sleighGeo);
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+            sleigh.add(new THREE.LineSegments(edgeGeo, edgeMat));
+
+            // 2. Ông già Noel (Santa) - Hình khối rõ ràng
+            // Thân (Màu đỏ sáng)
+            const bodyGeo = new THREE.SphereGeometry(1.3, 16, 16);
+            const bodyMat = new THREE.MeshBasicMaterial({ color: 0xff5555 }); 
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.set(0.5, 1.2, 0);
+            santaGroup.add(body);
+            
+            // Khuôn mặt/Râu (Màu trắng sáng)
+            const faceGeo = new THREE.SphereGeometry(0.7, 16, 16);
+            const faceMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const face = new THREE.Mesh(faceGeo, faceMat);
+            face.position.set(0.5, 0.5, 0); // Nhô ra phía trước
+            body.add(face);
+
+            // Mũ (Nón chóp đỏ)
+            const hatGeo = new THREE.ConeGeometry(0.7, 1.8, 16);
+            const hatMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const hat = new THREE.Mesh(hatGeo, hatMat);
+            hat.rotation.z = -0.3;
+            hat.position.set(0, 1.3, 0);
+            body.add(hat);
+            
+            // Chóp mũ (Cục bông trắng)
+            const pompom = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color: 0xffffff}));
+            pompom.position.set(0, 0.9, 0);
+            hat.add(pompom);
+
+            // 3. Túi quà (Gift Sack) - Khối vàng to và sáng
+            const sackGeo = new THREE.IcosahedronGeometry(1.6, 0);
+            const sackMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, wireframe: true });
+            const sack = new THREE.Mesh(sackGeo, sackMat);
+            sack.position.set(-2.0, 1.2, 0); 
+            santaGroup.add(sack);
+
+            // 4. Tuần lộc (Real Shape) - Thay thế khối nón bằng hàm buildCyberReindeer
+            for(let i=0; i<4; i++) {
+                const r = buildCyberReindeer();
+                
+                // Vị trí
+                const xOff = 6 + Math.floor(i/2) * 3.5; 
+                const zOff = (i % 2 === 0 ? 1 : -1) * 1.5; 
+                
+                r.position.set(xOff, 0, zOff);
+                
+                // Xoay ngang để đầu hướng về phía trước (+X)
+                r.rotation.y = Math.PI / 2;
+                
+                r.userData = { isReindeer: true, offset: i }; 
+                santaGroup.add(r);
+                
+                // Dây cương nối
+                // Tính điểm nối trên cổ tuần lộc (tương đối)
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(2, 0.5, 0), // Mũi xe
+                    new THREE.Vector3(xOff - 0.5, 1.0, zOff) // Sau gáy tuần lộc
+                ]);
+                const lineMat = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.5 });
+                santaGroup.add(new THREE.Line(lineGeo, lineMat));
+            }
+
+            // Đặt vị trí xuất phát: Gần trung tâm hơn để thấy ngay (-60 thay vì -120), thấp hơn chút
+            santaGroup.position.set(-60, 5, 0); 
+            // Hơi nghiêng để thấy được độ khối 3D
+            santaGroup.rotation.y = -0.3; 
+            santaGroup.rotation.x = 0.1;
+        }
+
+        createCyberSanta();
+
+        // --- SPECIAL TEXT GENERATION FUNCTION (WITH FRAME & DECORATION) ---
+        function generateTextParticles(textFull) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            // TĂNG CANVAS SIZE LỚN ĐỂ FONT NÉT HƠN
-            canvas.width = 1000; 
+            // Mở rộng Canvas để chứa 1 hàng ngang
+            canvas.width = 2000; 
             canvas.height = 500;
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // FONT LỚN 180px ĐỂ NHIỀU PIXEL HƠN
-            ctx.font = 'bold 160px "Playball", cursive'; 
+            // 1. Vẽ Khung (Frame)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+            ctx.lineWidth = 20;
+            // Vẽ khung bo góc nhẹ hoặc vuông
+            ctx.strokeRect(100, 50, canvas.width - 200, canvas.height - 100);
+
+            // 2. Trang trí góc (Decorations)
             ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            const decorSize = 30;
+            // Vẽ 4 hình tròn trang trí ở 4 góc
+            ctx.beginPath(); ctx.arc(100, 50, decorSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(canvas.width - 100, 50, decorSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(100, canvas.height - 50, decorSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(canvas.width - 100, canvas.height - 50, decorSize, 0, Math.PI * 2); ctx.fill();
+
+            // 3. Vẽ Chữ (Text) - 1 Hàng Ngang
+            ctx.font = 'bold 180px "Playball", cursive'; 
+            ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             
-            // Vẽ 2 dòng chữ tách nhau ra chút
-            ctx.fillText(text1, canvas.width / 2, canvas.height / 2 - 80);
-            ctx.fillText(text2, canvas.width / 2, canvas.height / 2 + 80);
+            // Vẽ chữ vào chính giữa khung
+            ctx.fillText(textFull, canvas.width / 2, canvas.height / 2);
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             const points = [];
-
-            // GIẢM BƯỚC QUÉT XUỐNG CÒN 3 ĐỂ MẬT ĐỘ HẠT DÀY ĐẶC
-            const step = 3;
+            
+            // Scan với bước nhảy tối ưu để lấy cả khung và chữ
+            const step = 5; 
             for (let y = 0; y < canvas.height; y += step) {
                 for (let x = 0; x < canvas.width; x += step) {
                     const index = (y * canvas.width + x) * 4;
-                    const alpha = data[index + 3];
-                    
-                    if (alpha > 128) { 
+                    // Lấy pixel có màu (alpha > 128)
+                    if (data[index + 3] > 128) { 
                         points.push({
-                            // Scale nhỏ lại vì canvas to ra
-                            x: (x - canvas.width / 2) * 0.05, 
-                            y: (canvas.height / 2 - y) * 0.05, 
-                            z: (Math.random() - 0.5) * 1.5 // Giảm độ dày Z để chữ sắc nét hơn từ view trước
+                            // Scale nhỏ lại để vừa màn hình
+                            x: (x - canvas.width / 2) * 0.035, 
+                            y: (canvas.height / 2 - y) * 0.035, 
+                            z: 0 // Làm phẳng trên mặt phẳng 2D để dễ đọc
                         });
                     }
                 }
@@ -348,8 +607,7 @@
             return points;
         }
 
-        // Tạo sẵn tọa độ cho chữ "Giáng Sinh Vui Vẻ"
-        const xmasPoints = generateTextParticles("Giáng Sinh", "Vui Vẻ");
+        const xmasPoints = generateTextParticles("Giáng Sinh Vui Vẻ");
 
         // --- MAIN OBJECTS ---
         const gridHelper = new THREE.GridHelper(200, 40, CONFIG.colors.cyan, 0x111111);
@@ -369,9 +627,7 @@
         const dummy = new THREE.Object3D();
         const particles = [];
 
-        // Khởi tạo hạt
         for (let i = 0; i < CONFIG.particles.count; i++) {
-            // Tree shape
             const h = Math.random();
             const theta = i * 0.15 + Math.random(); 
             const r = (1 - h) * CONFIG.tree.radius + Math.random();
@@ -379,7 +635,6 @@
             const yTree = (h * CONFIG.tree.height) - (CONFIG.tree.height / 2);
             const zTree = r * Math.sin(theta);
 
-            // Universe shape
             const rG = 15 + Math.random() * 15;
             const thetaG = Math.random() * Math.PI * 2;
             const phiG = Math.acos(2 * Math.random() - 1);
@@ -387,20 +642,17 @@
             const yG = rG * Math.sin(phiG) * Math.sin(thetaG);
             const zG = rG * Math.cos(phiG);
 
-            // Xmas Text Position
             let xText, yText, zText;
             if (i < xmasPoints.length) {
-                // Hạt tham gia xếp chữ
-                xText = xmasPoints[i].x;
-                yText = xmasPoints[i].y;
-                zText = xmasPoints[i].z;
+                // Hạt thuộc về chữ/khung
+                xText = xmasPoints[i].x; yText = xmasPoints[i].y; zText = xmasPoints[i].z;
             } else {
-                // HẠT THỪA ĐẨY RA XA HƠN ĐỂ KHÔNG CHE CHỮ
+                // Hạt nền
                 const angle = Math.random() * Math.PI * 2;
-                const rad = 40 + Math.random() * 20; // Bán kính lớn hơn
+                const rad = 40 + Math.random() * 20; 
                 xText = Math.cos(angle) * rad;
                 yText = (Math.random() - 0.5) * 40;
-                zText = -30 + Math.random() * 10; // Đẩy ra sau nền
+                zText = -30 + Math.random() * 10; 
             }
 
             const color = new THREE.Color();
@@ -425,7 +677,7 @@
                 currPos: new THREE.Vector3(xTree, yTree, zTree),
                 originalColor: color.clone(),
                 rotationSpeed: Math.random() * 0.1,
-                isTextParticle: i < xmasPoints.length // Đánh dấu hạt nào thuộc về chữ
+                isTextParticle: i < xmasPoints.length
             });
             
             dummy.position.set(xTree, yTree, zTree);
@@ -436,18 +688,46 @@
         mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
         mesh1.instanceColor.needsUpdate = true; mesh2.instanceColor.needsUpdate = true;
 
-        // Core Objects
         const coreGeo = new THREE.IcosahedronGeometry(2, 1);
         const coreMat = new THREE.MeshBasicMaterial({ color: CONFIG.colors.core, wireframe: true, transparent: true, opacity: 0.8 });
         const coreMesh = new THREE.Mesh(coreGeo, coreMat);
         scene.add(coreMesh);
         
-        const ringGeo1 = new THREE.TorusGeometry(12, 0.05, 16, 100);
-        const ringMat1 = new THREE.MeshBasicMaterial({ color: CONFIG.colors.cyan, transparent: true, opacity: 0.4 });
-        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-        scene.add(ring1);
+        // --- THAY THẾ: HỆ THỐNG VÒNG VŨ TRỤ (COSMIC RINGS) ---
+        const cosmicRings = [];
+        const ringCount = 3; // Số lượng vòng
+        
+        for(let i=0; i<ringCount; i++) {
+            // Bán kính vòng tăng dần từ 14 đến 20
+            const radius = 14 + i * 2.5; 
+            const tube = 0.03; // Độ mảnh của vòng
+            const ringGeo = new THREE.TorusGeometry(radius, tube, 16, 100);
+            
+            const ringMat = new THREE.MeshBasicMaterial({ 
+                color: (i % 2 === 0) ? CONFIG.colors.cyan : CONFIG.colors.purple, // Xen kẽ màu
+                transparent: true, 
+                opacity: 0.4, 
+                blending: THREE.AdditiveBlending 
+            });
+            
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            
+            // Đặt góc nghiêng ngẫu nhiên ban đầu để tạo vẻ "nguyên tử"
+            ring.rotation.x = Math.random() * Math.PI;
+            ring.rotation.y = Math.random() * Math.PI;
+            
+            // Lưu tốc độ quay riêng cho từng vòng
+            ring.userData = {
+                rotX: (Math.random() - 0.5) * 0.4,
+                rotY: (Math.random() - 0.5) * 0.4,
+                rotZ: (Math.random() - 0.5) * 0.4
+            };
+            
+            scene.add(ring);
+            cosmicRings.push(ring);
+        }
 
-        // Snow & Meteors
+        // --- SNOW & METEORS ---
         const snowGeo = new THREE.BufferGeometry();
         const snowPos = new Float32Array(CONFIG.snowCount * 3);
         const snowVel = [];
@@ -716,9 +996,9 @@
                 // Animation Màu sắc 
                 const targetColor = new THREE.Color();
                 if (mode === 'TEXT_XMAS') {
-                    // Chữ màu vàng Gold, nền màu đỏ mờ
-                    if (p.isTextParticle) targetColor.setHex(CONFIG.colors.gold);
-                    else targetColor.setHex(Math.random() < 0.5 ? CONFIG.colors.red : 0x110000);
+                    // ĐỔI MÀU: Chữ màu Xanh Dương (Neon Blue), nền màu đỏ mờ hoặc tối
+                    if (p.isTextParticle) targetColor.setHex(CONFIG.colors.neonBlue);
+                    else targetColor.setHex(Math.random() < 0.5 ? CONFIG.colors.red : 0x050510);
                 } else {
                     targetColor.copy(p.originalColor);
                 }
@@ -762,12 +1042,89 @@
             const time = clock.getElapsedTime();
             TWEEN.update();
 
-            mesh1.rotation.y = time * 0.1; mesh2.rotation.y = time * -0.05;
+            // CHỈNH SỬA: Dừng xoay khung lưới chứa hạt khi ở chế độ Giáng Sinh để chữ đứng im
+            if (STATE.mode === 'TEXT_XMAS') {
+                // Đưa góc xoay về 0 từ từ cho mượt
+                mesh1.rotation.y = THREE.MathUtils.lerp(mesh1.rotation.y, 0, 0.05);
+                mesh2.rotation.y = THREE.MathUtils.lerp(mesh2.rotation.y, 0, 0.05);
+            } else {
+                // Các chế độ khác thì xoay bình thường
+                mesh1.rotation.y = time * 0.1; 
+                mesh2.rotation.y = time * -0.05;
+            }
+
             gridHelper.position.z = (time * 5) % 40; 
             
             coreMesh.rotation.x = time * 0.5; coreMesh.rotation.y = time * 0.3;
             const pulse = 1 + Math.sin(time * 3) * 0.2;
             coreMesh.scale.set(pulse, pulse, pulse);
+
+            // --- ANIMATE SANTA & REINDEER (CẬP NHẬT CHUYỂN ĐỘNG) ---
+            if (santaGroup) {
+                // Bay nhanh hơn chút
+                santaGroup.position.x += 0.4; 
+                
+                // Bay lượn sóng nhẹ nhàng
+                santaGroup.position.y = 5 + Math.sin(time * 1.0) * 4;
+                santaGroup.rotation.z = Math.sin(time * 1.0) * 0.1; // Nghiêng theo nhịp bay
+                
+                // Reset khi bay hết màn hình
+                if (santaGroup.position.x > 100) {
+                    santaGroup.position.x = -100;
+                    santaGroup.position.y = Math.random() * 10 - 5;
+                }
+
+                // Hiệu ứng tuần lộc "phi" và cử động chân
+                santaGroup.children.forEach(child => {
+                    if (child.userData.isReindeer) {
+                        // Nhấp nhô toàn thân
+                        child.position.y = Math.sin(time * 12 + child.userData.offset) * 0.3;
+                        
+                        // Cử động chân (Duyệt qua các con của Group tuần lộc)
+                        child.children.forEach(part => {
+                            if (part.userData.isLeg) {
+                                // Đung đưa chân theo nhịp sin
+                                part.rotation.x = Math.sin(time * 15 + part.userData.offset + child.userData.offset) * 0.5;
+                            }
+                        });
+                    }
+                });
+            }
+
+            // --- ANIMATE COSMIC RINGS ---
+            cosmicRings.forEach(ring => {
+                ring.rotation.x += ring.userData.rotX * 0.01;
+                ring.rotation.y += ring.userData.rotY * 0.01;
+                ring.rotation.z += ring.userData.rotZ * 0.01;
+            });
+
+            // --- ANIMATE GALAXIES & NEBULA ---
+            galaxies.forEach(g => { g.rotation.z += g.userData.rotSpeedZ; });
+            nebulaSystem.rotation.y = time * 0.02;
+
+            // --- ANIMATE SNOW ---
+            const snowPositions = snowSystem.geometry.attributes.position.array;
+            for(let i=0; i<CONFIG.snowCount; i++) {
+                snowPositions[i*3+1] -= snowVel[i]; 
+                if(snowPositions[i*3+1] < -30) snowPositions[i*3+1] = 30; 
+            }
+            snowSystem.geometry.attributes.position.needsUpdate = true;
+
+            // --- ANIMATE METEORS ---
+            for(let i=0; i<CONFIG.meteorCount; i++) {
+                const md = meteorData[i];
+                md.x -= md.speed; 
+                if(md.x < -100) {
+                    md.x = 100;
+                    md.y = (Math.random() - 0.5) * 60;
+                }
+                dummy.position.set(md.x, md.y, md.z);
+                dummy.rotation.z = 0; 
+                dummy.scale.set(md.scale, 1, 1);
+                dummy.updateMatrix();
+                meteors.setMatrixAt(i, dummy.matrix);
+            }
+            meteors.instanceMatrix.needsUpdate = true;
             
             if (STATE.mode === 'TEXT_XMAS') {
                  scene.rotation.y = THREE.MathUtils.lerp(scene.rotation.y, 0, 0.05);
@@ -785,7 +1142,9 @@
                 textHoloGroup.scale.set(s, s, s);
             }
 
-            bloomPass.strength = 1.8 + Math.sin(time * 4) * 0.2;
+            // GIẢM ĐỘ CHÓI TRONG VÒNG LẶP ANIMATION
+            bloomPass.strength = 0.6 + Math.sin(time * 4) * 0.1; // Giảm biên độ dao động và mức nền (1.8 -> 0.6)
+            
             mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
             composer.render();
         }
