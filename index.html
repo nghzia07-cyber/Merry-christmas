@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberpunk Christmas Core - Ultimate Galaxy</title>
+    <title>Cyberpunk Christmas - Galaxy Edition</title>
     
-    <!-- Tải Font Sci-fi -->
+    <!-- Tải Font Sci-fi, Font dễ đọc & Font Giáng Sinh (Playball) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Playball&display=swap" rel="stylesheet">
 
     <!-- MediaPipe Core -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
@@ -20,130 +20,126 @@
             margin: 0;
             overflow: hidden;
             background-color: #000000;
-            font-family: 'Orbitron', sans-serif;
-            color: #00f3ff;
+            font-family: 'Rajdhani', sans-serif;
+            color: #ffffff;
             user-select: none;
         }
 
         /* Scanline Overlay */
         .scanline-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 99;
+            pointer-events: none; z-index: 5;
         }
 
         /* Glitch Animation */
         @keyframes flash-glitch {
             0% { background-color: rgba(0, 243, 255, 0); }
-            10% { background-color: rgba(0, 243, 255, 0.2); transform: translateX(5px); }
-            20% { background-color: rgba(188, 19, 254, 0.2); transform: translateX(-5px); }
+            10% { background-color: rgba(255, 0, 200, 0.1); transform: translateX(2px); }
+            20% { background-color: rgba(188, 19, 254, 0.1); transform: translateX(-2px); }
             30% { background-color: rgba(0, 243, 255, 0); transform: translateX(0); }
             100% { background-color: rgba(0, 243, 255, 0); }
         }
 
-        .glitch-effect {
-            animation: flash-glitch 0.3s ease-out;
-        }
+        .glitch-effect { animation: flash-glitch 0.2s ease-out; }
 
-        #canvas-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1;
-        }
-
-        #input-video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 320px; height: 240px;
-            opacity: 0; pointer-events: none; z-index: 0;
-        }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #input-video { position: absolute; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: 0; }
 
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 10; pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between; padding: 20px;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 24px;
+            box-sizing: border-box;
         }
 
-        .header { text-align: center; text-transform: uppercase; }
+        .header { 
+            text-align: center; text-transform: uppercase; margin-top: 10px; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .title-container { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .header-logo { height: 60px; width: auto; filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.6)); }
+        
         h1 {
-            font-size: 2.5rem; margin: 0; color: #fff;
-            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
-            letter-spacing: 5px; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; font-size: 2.8rem; margin: 0; color: #fff;
+            text-shadow: 0 0 15px #00f3ff; letter-spacing: 4px; font-weight: 800;
         }
         .subtitle {
-            font-family: 'Share Tech Mono', monospace; color: #bc13fe;
-            font-size: 1rem; margin-top: 5px; letter-spacing: 2px;
+            font-family: 'Rajdhani', sans-serif; color: #ff00ff;
+            font-size: 1.2rem; margin-top: 5px; letter-spacing: 6px; font-weight: 600;
+            text-shadow: 0 0 5px #ff00ff;
         }
 
         .status-panel {
-            position: absolute; top: 100px; left: 20px;
-            background: rgba(0, 10, 20, 0.85);
-            border: 1px solid #00f3ff; border-left: 5px solid #00f3ff;
-            padding: 20px; pointer-events: auto;
-            clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            position: absolute; top: 120px; left: 30px;
+            background: rgba(5, 10, 20, 0.95);
+            border-left: 4px solid #00f3ff; padding: 20px 25px; 
+            pointer-events: auto; border-radius: 0 8px 8px 0;
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); min-width: 250px;
         }
 
-        .status-item {
-            margin-bottom: 12px; font-size: 0.8rem; display: flex; align-items: center;
-            color: #00f3ff; font-family: 'Share Tech Mono', monospace;
-        }
-        .status-value { color: #fff; margin-left: 10px; font-weight: bold; }
+        .status-item { margin-bottom: 15px; font-size: 1rem; display: flex; align-items: center; color: #aaddff; font-weight: 500; }
+        .status-value { color: #fff; margin-left: auto; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .icon { margin-right: 10px; filter: drop-shadow(0 0 2px currentColor); }
         
         .upload-btn {
-            background: rgba(0, 243, 255, 0.1); border: 1px solid #bc13fe; color: #bc13fe;
-            padding: 8px 15px; font-family: 'Orbitron', sans-serif; font-weight: bold;
-            cursor: pointer; transition: all 0.2s; text-transform: uppercase; width: 100%;
-            margin-top: 10px; pointer-events: auto;
+            background: linear-gradient(90deg, rgba(0, 243, 255, 0.2), transparent); 
+            border: 1px solid #00f3ff; color: #00f3ff; padding: 10px 15px; 
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.3s; text-transform: uppercase; width: 100%;
+            margin-top: 15px; pointer-events: auto; border-radius: 4px;
         }
-        .upload-btn:hover { background: #bc13fe; color: #000; box-shadow: 0 0 15px #bc13fe; }
+        .upload-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 15px #00f3ff; }
 
-        /* Loading Screen */
+        .gesture-guide {
+            position: absolute; bottom: 40px; right: 40px; 
+            text-align: right; pointer-events: auto;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .guide-item {
+            background: rgba(0, 0, 0, 0.9); padding: 10px 20px; 
+            border-right: 4px solid #ff00ff; color: #fff; font-size: 0.9rem; font-weight: 600;
+            font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.5); border-radius: 4px 0 0 4px;
+            transition: transform 0.2s;
+        }
+        .guide-item.special { border-right-color: #FFD700; color: #FFD700; }
+        .guide-item:hover { transform: translateX(-5px); }
+
         #loading {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 100;
+            background: #050508; z-index: 100;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             transition: opacity 0.5s;
         }
         .loader-ring {
-            width: 80px; height: 80px; border: 4px solid transparent;
-            border-top: 4px solid #00f3ff; border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
+            width: 60px; height: 60px; border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #00f3ff; border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .btn-tech {
-            margin-top: 15px; padding: 12px 24px; background: #111; border: 1px solid #00f3ff;
-            color: #00f3ff; cursor: pointer; font-family: 'Share Tech Mono'; font-size: 1rem;
-            pointer-events: auto; text-transform: uppercase; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-            display: none;
+            margin-top: 20px; padding: 12px 30px; 
+            background: transparent; border: 2px solid #00f3ff;
+            color: #00f3ff; cursor: pointer; 
+            font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: bold;
+            pointer-events: auto; text-transform: uppercase; letter-spacing: 2px;
+            transition: all 0.3s; display: none;
         }
-        .btn-tech:hover { background: #00f3ff; color: #000; }
+        .btn-tech:hover { background: #00f3ff; color: #000; box-shadow: 0 0 20px #00f3ff; }
         .btn-tech.visible { display: block; }
-        #error-msg { color: #ff0055; margin-top: 10px; font-family: 'Share Tech Mono'; max-width: 80%; text-align: center; }
-
-        .gesture-guide {
-            position: absolute; bottom: 30px; right: 30px; text-align: right; pointer-events: auto;
-        }
-        .guide-item {
-            background: rgba(0, 0, 0, 0.8); padding: 5px 15px; margin: 5px 0;
-            border-right: 4px solid #bc13fe; color: #fff; font-size: 0.75rem;
-            font-family: 'Share Tech Mono', monospace; text-transform: uppercase;
-        }
+        #error-msg { color: #ff3366; margin-top: 15px; font-weight: bold; }
 
         #webcam-preview-container {
-            position: absolute; bottom: 20px; left: 20px; width: 160px; height: 120px;
-            border: 2px solid #00f3ff; overflow: hidden; z-index: 20;
-            pointer-events: auto; background: #000;
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+            position: absolute; bottom: 30px; left: 30px; width: 180px; height: 135px;
+            border: 2px solid #333; overflow: hidden; z-index: 20;
+            pointer-events: auto; background: #000; border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
         }
-        #webcam-canvas { width: 100%; height: 100%; transform: scaleX(-1); }
+        #webcam-canvas { width: 100%; height: 100%; transform: scaleX(-1); opacity: 0.8; }
         .fade-out { opacity: 0; pointer-events: none; }
     </style>
 
@@ -164,10 +160,10 @@
     <!-- Loading Screen -->
     <div id="loading">
         <div class="loader-ring"></div>
-        <div style="font-family: 'Share Tech Mono'; color: #00f3ff; font-size: 1.2rem;">LOADING CORE SYSTEMS...</div>
+        <div style="font-family: 'Orbitron'; color: #fff; font-size: 1.5rem; letter-spacing: 3px;">SYSTEM STARTUP</div>
         <div id="error-msg"></div>
-        <button id="start-cam-btn" class="btn-tech" onclick="startCamera()">ACTIVATE CAMERA</button>
-        <button id="manual-start-btn" class="btn-tech" onclick="forceManual()">MANUAL OVERRIDE</button>
+        <button id="start-cam-btn" class="btn-tech" onclick="startCamera()">BẬT CAMERA</button>
+        <button id="manual-start-btn" class="btn-tech" onclick="forceManual()">CHẾ ĐỘ THỦ CÔNG</button>
     </div>
 
     <video id="input-video" playsinline muted autoplay></video>
@@ -175,34 +171,38 @@
     <!-- UI -->
     <div id="ui-layer">
         <div class="header">
-            <h1>CYBER TREE 3.0</h1>
-            <div class="subtitle">ULTIMATE GALAXY EDITION</div>
+            <div class="title-container">
+                <img src="https://i.postimg.cc/c4wS7FNX/Chat-GPT-Image-16-18-40-3-thg-12-2025.png" alt="Cyber Logo" class="header-logo">
+                <h1>MULTIVERSE TREE</h1>
+            </div>
+            <div class="subtitle">GALAXY EDITION</div>
         </div>
 
         <div class="status-panel">
             <div class="status-item">
-                <span class="icon">🔮</span>
-                <span>STATUS:</span>
-                <span class="status-value" id="ai-status">INITIALIZING</span>
+                <span class="icon">📡</span>
+                <span>TRẠNG THÁI</span>
+                <span class="status-value" id="ai-status">ĐANG TẢI...</span>
             </div>
             <div class="status-item">
                 <span class="icon">💠</span>
-                <span>MODE:</span>
-                <span class="status-value" id="current-mode">CONVERGENCE</span>
+                <span>CHẾ ĐỘ</span>
+                <span class="status-value" id="current-mode">HỘI TỤ</span>
             </div>
-            <hr style="border-color: #00f3ff; opacity: 0.3;">
-            <p style="margin: 5px 0; font-size: 0.7rem; color: #bc13fe; font-family: 'Share Tech Mono';">DATA INJECTION:</p>
+            <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 15px 0;"></div>
+            <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #aaddff;">TẢI ẢNH KỶ NIỆM:</p>
             <input type="file" id="image-upload" accept="image/*" multiple style="display: none;">
             <button class="upload-btn" onclick="document.getElementById('image-upload').click()">
-                UPLOAD DATA BLOCKS
+                📂 CHỌN ẢNH
             </button>
         </div>
 
         <div class="gesture-guide">
-            <div class="guide-item">✊ FIST [CORE] :: ASSEMBLE</div>
-            <div class="guide-item">🖐 PALM [VOID] :: DISPERSE</div>
-            <div class="guide-item">👋 WAVE [VIEW] :: ROTATE</div>
-            <div class="guide-item">👌 PINCH [SCAN] :: ZOOM</div>
+            <div class="guide-item">✊ 0-1 NGÓN : CÂY THÔNG</div>
+            <div class="guide-item">✌️ 2 NGÓN : XIN CHÀO</div>
+            <div class="guide-item">🤟 3 NGÓN : HIỆN TÊN</div>
+            <div class="guide-item special">🖖 4 NGÓN : GIÁNG SINH</div>
+            <div class="guide-item">🖐 5 NGÓN : VŨ TRỤ</div>
         </div>
     </div>
 
@@ -221,14 +221,14 @@
 
         // --- EXPORTS FOR HTML ---
         window.startCamera = async function() {
-            document.getElementById('error-msg').innerText = "REQUESTING NEURAL LINK...";
+            document.getElementById('error-msg').innerText = "ĐANG KẾT NỐI CAMERA...";
             await initCameraDirectly();
         };
 
         window.forceManual = function() {
             document.getElementById('loading').classList.add('fade-out');
-            document.getElementById('ai-status').innerText = "MANUAL CONTROL";
-            document.getElementById('ai-status').style.color = "yellow";
+            document.getElementById('ai-status').innerText = "THỦ CÔNG";
+            document.getElementById('ai-status').style.color = "#ffff00";
             isManualMode = true;
         };
 
@@ -239,13 +239,19 @@
                 purple: 0xbc13fe,
                 green: 0x00ff41,
                 white: 0xffffff,
-                core: 0xff3366,
-                orange: 0xffaa00
+                core: 0xff0055,
+                orange: 0xffaa00,
+                magenta: 0xff00ff,
+                lime: 0xccff00,
+                deepBlue: 0x2200ff,
+                gold: 0xFFD700,    // Màu vàng giáng sinh
+                red: 0xFF0033      // Màu đỏ giáng sinh
             },
-            particles: { count: 2200, size: 0.1 },
+            // TĂNG SỐ LƯỢNG HẠT LÊN 10.000 ĐỂ CHỮ DÀY DẶN HƠN
+            particles: { count: 10000, size: 0.1 }, 
             tree: { height: 18, radius: 8 },
             snowCount: 800,
-            meteorCount: 30 // Số lượng sao băng
+            meteorCount: 30
         };
 
         const STATE = {
@@ -260,8 +266,8 @@
         // --- SCENE ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020205); // Darker cyber void
-        scene.fog = new THREE.FogExp2(0x020205, 0.02);
+        scene.background = new THREE.Color(0x050011);
+        scene.fog = new THREE.FogExp2(0x050011, 0.015);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 0, 30);
@@ -277,22 +283,79 @@
         
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
         bloomPass.threshold = 0.1; 
-        bloomPass.strength = 1.8; 
-        bloomPass.radius = 0.6;
+        bloomPass.strength = 1.6; 
+        bloomPass.radius = 0.5;
         composer.addPass(bloomPass);
 
-        // --- OBJECTS ---
-        
-        // 1. Grids
+        // --- BACKGROUND: NEBULA & STARS ---
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 3000;
+        const starPos = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount; i++) {
+            const r = 100 + Math.random() * 200;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            starPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            starPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+            starPos[i*3+2] = r * Math.cos(phi);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.2, transparent: true, opacity: 0.8});
+        const starField = new THREE.Points(starGeo, starMat);
+        scene.add(starField);
+
+        // --- SPECIAL TEXT GENERATION FUNCTION (HIGH RES) ---
+        function generateTextParticles(text1, text2) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            // TĂNG CANVAS SIZE LỚN ĐỂ FONT NÉT HƠN
+            canvas.width = 1000; 
+            canvas.height = 500;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // FONT LỚN 180px ĐỂ NHIỀU PIXEL HƠN
+            ctx.font = 'bold 160px "Playball", cursive'; 
+            ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Vẽ 2 dòng chữ tách nhau ra chút
+            ctx.fillText(text1, canvas.width / 2, canvas.height / 2 - 80);
+            ctx.fillText(text2, canvas.width / 2, canvas.height / 2 + 80);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const points = [];
+
+            // GIẢM BƯỚC QUÉT XUỐNG CÒN 3 ĐỂ MẬT ĐỘ HẠT DÀY ĐẶC
+            const step = 3;
+            for (let y = 0; y < canvas.height; y += step) {
+                for (let x = 0; x < canvas.width; x += step) {
+                    const index = (y * canvas.width + x) * 4;
+                    const alpha = data[index + 3];
+                    
+                    if (alpha > 128) { 
+                        points.push({
+                            // Scale nhỏ lại vì canvas to ra
+                            x: (x - canvas.width / 2) * 0.05, 
+                            y: (canvas.height / 2 - y) * 0.05, 
+                            z: (Math.random() - 0.5) * 1.5 // Giảm độ dày Z để chữ sắc nét hơn từ view trước
+                        });
+                    }
+                }
+            }
+            return points;
+        }
+
+        // Tạo sẵn tọa độ cho chữ "Giáng Sinh Vui Vẻ"
+        const xmasPoints = generateTextParticles("Giáng Sinh", "Vui Vẻ");
+
+        // --- MAIN OBJECTS ---
         const gridHelper = new THREE.GridHelper(200, 40, CONFIG.colors.cyan, 0x111111);
         gridHelper.position.y = -12;
         scene.add(gridHelper);
-        const gridHelperTop = new THREE.GridHelper(200, 40, CONFIG.colors.purple, 0x111111);
-        gridHelperTop.position.y = 22;
-        gridHelperTop.rotation.x = Math.PI;
-        scene.add(gridHelperTop);
 
-        // 2. Main Particles
         const geo1 = new THREE.TetrahedronGeometry(0.2, 0);
         const mat1 = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true }); 
         const mesh1 = new THREE.InstancedMesh(geo1, mat1, CONFIG.particles.count / 2);
@@ -306,8 +369,9 @@
         const dummy = new THREE.Object3D();
         const particles = [];
 
+        // Khởi tạo hạt
         for (let i = 0; i < CONFIG.particles.count; i++) {
-            // Tree
+            // Tree shape
             const h = Math.random();
             const theta = i * 0.15 + Math.random(); 
             const r = (1 - h) * CONFIG.tree.radius + Math.random();
@@ -315,7 +379,7 @@
             const yTree = (h * CONFIG.tree.height) - (CONFIG.tree.height / 2);
             const zTree = r * Math.sin(theta);
 
-            // Galaxy
+            // Universe shape
             const rG = 15 + Math.random() * 15;
             const thetaG = Math.random() * Math.PI * 2;
             const phiG = Math.acos(2 * Math.random() - 1);
@@ -323,12 +387,29 @@
             const yG = rG * Math.sin(phiG) * Math.sin(thetaG);
             const zG = rG * Math.cos(phiG);
 
-            // Colors
+            // Xmas Text Position
+            let xText, yText, zText;
+            if (i < xmasPoints.length) {
+                // Hạt tham gia xếp chữ
+                xText = xmasPoints[i].x;
+                yText = xmasPoints[i].y;
+                zText = xmasPoints[i].z;
+            } else {
+                // HẠT THỪA ĐẨY RA XA HƠN ĐỂ KHÔNG CHE CHỮ
+                const angle = Math.random() * Math.PI * 2;
+                const rad = 40 + Math.random() * 20; // Bán kính lớn hơn
+                xText = Math.cos(angle) * rad;
+                yText = (Math.random() - 0.5) * 40;
+                zText = -30 + Math.random() * 10; // Đẩy ra sau nền
+            }
+
             const color = new THREE.Color();
             const rnd = Math.random();
-            if (rnd < 0.4) color.setHex(CONFIG.colors.cyan);
-            else if (rnd < 0.7) color.setHex(CONFIG.colors.purple);
-            else color.setHex(CONFIG.colors.green);
+            if (rnd < 0.2) color.setHex(CONFIG.colors.cyan);
+            else if (rnd < 0.4) color.setHex(CONFIG.colors.purple);
+            else if (rnd < 0.6) color.setHex(CONFIG.colors.green);
+            else if (rnd < 0.8) color.setHex(CONFIG.colors.magenta);
+            else color.setHex(CONFIG.colors.lime);
 
             const isGroup1 = i < CONFIG.particles.count / 2;
             const targetMesh = isGroup1 ? mesh1 : mesh2;
@@ -340,8 +421,11 @@
                 mesh: targetMesh, index: indexInMesh,
                 treePos: new THREE.Vector3(xTree, yTree, zTree),
                 dispPos: new THREE.Vector3(xG, yG, zG),
+                textPos: new THREE.Vector3(xText, yText, zText),
                 currPos: new THREE.Vector3(xTree, yTree, zTree),
-                rotationSpeed: Math.random() * 0.1
+                originalColor: color.clone(),
+                rotationSpeed: Math.random() * 0.1,
+                isTextParticle: i < xmasPoints.length // Đánh dấu hạt nào thuộc về chữ
             });
             
             dummy.position.set(xTree, yTree, zTree);
@@ -352,33 +436,21 @@
         mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
         mesh1.instanceColor.needsUpdate = true; mesh2.instanceColor.needsUpdate = true;
 
-        // 3. ENERGY CORE (Lõi Năng Lượng)
+        // Core Objects
         const coreGeo = new THREE.IcosahedronGeometry(2, 1);
         const coreMat = new THREE.MeshBasicMaterial({ color: CONFIG.colors.core, wireframe: true, transparent: true, opacity: 0.8 });
         const coreMesh = new THREE.Mesh(coreGeo, coreMat);
         scene.add(coreMesh);
         
-        const coreInnerGeo = new THREE.IcosahedronGeometry(1, 0);
-        const coreInnerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const coreInner = new THREE.Mesh(coreInnerGeo, coreInnerMat);
-        coreMesh.add(coreInner);
-
-        // 4. CYBER RINGS (Vòng đai năng lượng) - MỚI
         const ringGeo1 = new THREE.TorusGeometry(12, 0.05, 16, 100);
         const ringMat1 = new THREE.MeshBasicMaterial({ color: CONFIG.colors.cyan, transparent: true, opacity: 0.4 });
         const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
         scene.add(ring1);
 
-        const ringGeo2 = new THREE.TorusGeometry(16, 0.05, 16, 100);
-        const ringMat2 = new THREE.MeshBasicMaterial({ color: CONFIG.colors.purple, transparent: true, opacity: 0.3 });
-        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
-        scene.add(ring2);
-
-        // 5. DIGITAL SNOW (Mưa tuyết kỹ thuật số)
+        // Snow & Meteors
         const snowGeo = new THREE.BufferGeometry();
         const snowPos = new Float32Array(CONFIG.snowCount * 3);
         const snowVel = [];
-        
         for(let i=0; i<CONFIG.snowCount; i++) {
             snowPos[i*3] = (Math.random() - 0.5) * 60; 
             snowPos[i*3+1] = (Math.random() - 0.5) * 60; 
@@ -392,42 +464,20 @@
         const snowSystem = new THREE.Points(snowGeo, snowMat);
         scene.add(snowSystem);
 
-        // 6. METEOR SHOWER - HORIZONTAL (Sao Băng Bay Ngang)
-        const meteorGeo = new THREE.BoxGeometry(4.0, 0.05, 0.05); // Dài theo chiều ngang
+        const meteorGeo = new THREE.BoxGeometry(4.0, 0.05, 0.05);
         const meteorMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
         const meteors = new THREE.InstancedMesh(meteorGeo, meteorMat, CONFIG.meteorCount);
         scene.add(meteors);
-
         const meteorData = [];
         for(let i = 0; i < CONFIG.meteorCount; i++) {
             meteorData.push({
-                x: (Math.random() - 0.5) * 200, 
-                y: (Math.random() - 0.5) * 60,     
-                z: -20 + (Math.random() * 40),  
-                speed: 1.5 + Math.random() * 3,
-                scale: 0.5 + Math.random() * 1.5
+                x: (Math.random() - 0.5) * 200, y: (Math.random() - 0.5) * 60, z: -20 + (Math.random() * 40),  
+                speed: 1.5 + Math.random() * 3, scale: 0.5 + Math.random() * 1.5
             });
-            dummy.position.set(0, 100, 0); // Hide initially
-            dummy.updateMatrix();
+            dummy.position.set(0, 100, 0); dummy.updateMatrix();
             meteors.setMatrixAt(i, dummy.matrix);
         }
 
-        // 7. ORBITERS (Vệ Tinh) - MỚI
-        const orbiterGroup = new THREE.Group();
-        scene.add(orbiterGroup);
-        const orbiterGeo = new THREE.SphereGeometry(0.3, 8, 8);
-        const orbiterMat = new THREE.MeshBasicMaterial({ color: CONFIG.colors.orange });
-        
-        const orb1 = new THREE.Mesh(orbiterGeo, orbiterMat);
-        orb1.position.set(12, 0, 0);
-        orbiterGroup.add(orb1);
-
-        const orb2 = new THREE.Mesh(orbiterGeo, orbiterMat);
-        orb2.position.set(-16, 4, 0);
-        orbiterGroup.add(orb2);
-
-
-        // 8. Photos
         const photoGroup = new THREE.Group();
         scene.add(photoGroup);
         const photos = [];
@@ -457,29 +507,54 @@
             photos.push({ mesh: mesh, treePos: new THREE.Vector3(x, y, z), dispPos: new THREE.Vector3(xG, yG, zG), isZoomed: false });
         }
 
-        function createTechCanvas(label, colorHex) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = "rgba(5, 5, 10, 0.95)"; ctx.fillRect(0,0,256,256);
-            ctx.strokeStyle = colorHex; ctx.lineWidth = 2;
-            
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(40,0); ctx.lineTo(0,40); ctx.fill();
-            ctx.strokeRect(10,10,236,236);
-            
-            ctx.fillStyle = "#ffffff"; ctx.font = "bold 24px Courier New"; ctx.textAlign = "center";
-            ctx.fillText("DATA NODE", 128, 100);
-            ctx.fillStyle = colorHex; ctx.font = "bold 48px Courier New";
-            ctx.fillText(label, 128, 160);
-            
-            const tex = new THREE.CanvasTexture(canvas);
-            tex.colorSpace = THREE.SRGBColorSpace;
-            return tex;
-        }
+        // --- UPDATED: TEXT HOLOGRAM SYSTEM (FIXED WIDTH) ---
+        const textHoloGroup = new THREE.Group();
+        scene.add(textHoloGroup);
+        textHoloGroup.visible = false; 
 
-        ["SYS", "NET", "CORE", "BIO", "LINK", "AI"].forEach((lbl, i) => {
-            createHoloFrame(createTechCanvas(lbl, i % 2 === 0 ? "#00f3ff" : "#bc13fe"));
+        // Increased width for the plane to fit long names (20 units wide)
+        const textGeo = new THREE.PlaneGeometry(20, 5); 
+        const textMat = new THREE.MeshBasicMaterial({
+            transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
         });
+        const textMesh = new THREE.Mesh(textGeo, textMat);
+        textMesh.position.set(0, 13, 0); 
+        textHoloGroup.add(textMesh);
+
+        const tbGeo = new THREE.EdgesGeometry(textGeo);
+        const tbMat = new THREE.LineBasicMaterial({ color: 0x00f3ff, transparent: true, opacity: 0.6, linewidth: 1 });
+        const tbMesh = new THREE.LineSegments(tbGeo, tbMat);
+        textMesh.add(tbMesh);
+
+        function updateHoloText(textString, glowColorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            const grd = ctx.createLinearGradient(0,0, 0, 512);
+            grd.addColorStop(0, "rgba(0, 5, 10, 0.8)");
+            grd.addColorStop(0.5, "rgba(0, 15, 30, 0.9)");
+            grd.addColorStop(1, "rgba(0, 5, 10, 0.8)");
+            ctx.fillStyle = grd; ctx.fillRect(0,0,2048,512);
+            
+            ctx.strokeStyle = glowColorHex; ctx.lineWidth = 4; ctx.strokeRect(10,10,2028,492);
+
+            ctx.shadowColor = glowColorHex; ctx.shadowBlur = 15;
+            ctx.fillStyle = "#FFFFFF"; 
+            
+            let fontSize = 140;
+            if (textString.length > 10) fontSize = 110;
+            if (textString.length > 15) fontSize = 90; 
+            
+            ctx.font = `700 ${fontSize}px 'Orbitron', sans-serif`;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(textString, 1024, 256);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+            textMat.map = tex; textMat.needsUpdate = true;
+            tbMat.color.set(glowColorHex);
+        }
 
         // --- CAMERA & AI ---
         const videoElement = document.getElementById('input-video');
@@ -501,7 +576,6 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240, facingMode: 'user' } });
                 videoElement.srcObject = stream;
                 await new Promise((resolve) => { videoElement.onloadedmetadata = () => { videoElement.play(); resolve(); }; });
-
                 document.getElementById('loading').classList.add('fade-out');
                 document.getElementById('ai-status').innerText = "ONLINE";
                 document.getElementById('ai-status').style.color = "#00ff41";
@@ -539,7 +613,6 @@
 
         setTimeout(() => { initCameraDirectly(); }, 1000);
 
-        // --- LOGIC ---
         function triggerGlitch() {
             document.getElementById('overlay').classList.add('glitch-effect');
             setTimeout(() => document.getElementById('overlay').classList.remove('glitch-effect'), 300);
@@ -547,44 +620,118 @@
 
         function processGestures(lm) {
             const dist = (i, j) => Math.hypot(lm[i].x - lm[j].x, lm[i].y - lm[j].y);
-            let open = 0; [8,12,16,20].forEach(tip => { if(lm[tip].y < lm[tip-2].y) open++; });
+            let open = 0; 
+            [8,12,16,20].forEach(tip => { if(lm[tip].y < lm[tip-2].y) open++; });
             if(dist(4,9) > dist(3,9)) open++;
+
             const isPinch = dist(4,8) < 0.05;
 
-            if(isPinch && STATE.mode !== 'ZOOM') zoomPhoto();
-            else if(open <= 1 && !isPinch) setMode('TREE');
-            else if(open >= 4) {
-                if(STATE.mode === 'TREE') setMode('DISPERSED');
+            if(isPinch && STATE.mode !== 'ZOOM') {
+                zoomPhoto();
+                textHoloGroup.visible = false;
+            }
+            else if(open === 2) {
+                if(STATE.mode !== 'TEXT_HELLO') {
+                    STATE.mode = 'TEXT_HELLO';
+                    document.getElementById('current-mode').innerText = "MSG: HELLO";
+                    updateHoloText("XIN CHÀO", "#FFD700"); 
+                    textHoloGroup.visible = true;
+                    setMode('TREE'); 
+                    triggerGlitch();
+                }
+            }
+            else if(open === 3) {
+                if(STATE.mode !== 'TEXT_NAME') {
+                    STATE.mode = 'TEXT_NAME';
+                    document.getElementById('current-mode').innerText = "MSG: ID";
+                    updateHoloText("NGUYỄN NGHĨA HLONG", "#00F3FF"); 
+                    textHoloGroup.visible = true;
+                    setMode('TREE');
+                    triggerGlitch();
+                }
+            }
+            // --- CẬP NHẬT: 4 NGÓN TAY ---
+            else if(open === 4) {
+                if(STATE.mode !== 'TEXT_XMAS') {
+                    textHoloGroup.visible = false; 
+                    setMode('TEXT_XMAS'); 
+                }
+            }
+            else if(open <= 1 && !isPinch) {
+                if(STATE.mode !== 'TREE') {
+                    textHoloGroup.visible = false;
+                    setMode('TREE');
+                }
+            }
+            else if(open >= 5) {
+                if(STATE.mode !== 'DISPERSED') {
+                    textHoloGroup.visible = false;
+                    setMode('DISPERSED');
+                }
                 STATE.targetRotation.x = (lm[9].y - 0.5) * 2;
                 STATE.targetRotation.y = (lm[9].x - 0.5) * 2;
             }
         }
 
         function setMode(mode) {
-            if(STATE.mode === mode && mode !== 'ZOOM') return;
+            if(STATE.mode === mode && mode !== 'TEXT_XMAS') return; 
             if(STATE.mode === 'ZOOM') new TWEEN.Tween(camera.position).to({x:0, y:0, z:30}, 1000).easing(TWEEN.Easing.Cubic.Out).start();
 
             STATE.mode = mode;
-            document.getElementById('current-mode').innerText = mode === 'TREE' ? 'CONVERGENCE' : mode === 'DISPERSED' ? 'UNIVERSE' : 'ANALYSIS';
+            
+            // UI Status Update
+            if(mode === 'TEXT_XMAS') document.getElementById('current-mode').innerText = "MERRY CHRISTMAS";
+            else if(mode === 'TREE') document.getElementById('current-mode').innerText = "CONVERGENCE";
+            else if(mode === 'DISPERSED') document.getElementById('current-mode').innerText = "UNIVERSE";
+
             triggerGlitch();
 
             const dur = 1500;
             const easing = TWEEN.Easing.Exponential.InOut;
-
+            
+            // Xử lý hạt
             particles.forEach(p => {
-                const target = mode === 'TREE' ? p.treePos : p.dispPos;
+                let target;
+                if (mode === 'TREE' || mode === 'TEXT_HELLO' || mode === 'TEXT_NAME') target = p.treePos;
+                else if (mode === 'DISPERSED') target = p.dispPos;
+                else if (mode === 'TEXT_XMAS') target = p.textPos;
+
+                // Animation vị trí
                 new TWEEN.Tween(p.currPos).to({x:target.x, y:target.y, z:target.z}, dur + Math.random()*500).easing(easing)
                     .onUpdate(() => {
                         dummy.position.copy(p.currPos);
                         dummy.rotation.x += p.rotationSpeed; dummy.rotation.y += p.rotationSpeed;
+                        
+                        // PHÓNG TO HẠT CHỮ ĐỂ RÕ NÉT HƠN
+                        if (mode === 'TEXT_XMAS' && p.isTextParticle) {
+                            dummy.scale.setScalar(1.2); 
+                        } else {
+                            dummy.scale.setScalar(Math.random() * 0.8 + 0.2);
+                        }
+
                         dummy.updateMatrix();
                         p.mesh.setMatrixAt(p.index, dummy.matrix);
                     }).start();
+
+                // Animation Màu sắc 
+                const targetColor = new THREE.Color();
+                if (mode === 'TEXT_XMAS') {
+                    // Chữ màu vàng Gold, nền màu đỏ mờ
+                    if (p.isTextParticle) targetColor.setHex(CONFIG.colors.gold);
+                    else targetColor.setHex(Math.random() < 0.5 ? CONFIG.colors.red : 0x110000);
+                } else {
+                    targetColor.copy(p.originalColor);
+                }
+                
+                p.mesh.setColorAt(p.index, targetColor);
             });
+            
+            mesh1.instanceColor.needsUpdate = true;
+            mesh2.instanceColor.needsUpdate = true;
 
             photos.forEach(p => {
                 p.isZoomed = false;
-                const target = mode === 'TREE' ? p.treePos : p.dispPos;
+                const target = (mode === 'TREE' || mode.startsWith('TEXT')) ? p.treePos : p.dispPos;
                 new TWEEN.Tween(p.mesh.position).to({x:target.x, y:target.y, z:target.z}, dur).easing(easing)
                     .onUpdate(() => {
                         if(mode === 'TREE') p.mesh.lookAt(0,0,0); else p.mesh.rotation.set(0,0,0);
@@ -592,7 +739,7 @@
                 new TWEEN.Tween(p.mesh.scale).to({x:1, y:1, z:1}, dur).start();
             });
 
-            if(mode === 'TREE') new TWEEN.Tween(camera.position).to({x:0, y:0, z:30}, dur).easing(easing).start();
+            if(mode === 'TREE' || mode === 'TEXT_XMAS') new TWEEN.Tween(camera.position).to({x:0, y:0, z:30}, dur).easing(easing).start();
         }
 
         function zoomPhoto() {
@@ -615,60 +762,27 @@
             const time = clock.getElapsedTime();
             TWEEN.update();
 
-            // Rotate Groups
             mesh1.rotation.y = time * 0.1; mesh2.rotation.y = time * -0.05;
-            
-            // Scanner Effect on Grid
             gridHelper.position.z = (time * 5) % 40; 
-            gridHelperTop.position.z = (time * 5) % 40;
-            // Pulse opacity/color logic could be added here if needed
-
-            // Animate Core & Rings
+            
             coreMesh.rotation.x = time * 0.5; coreMesh.rotation.y = time * 0.3;
             const pulse = 1 + Math.sin(time * 3) * 0.2;
             coreMesh.scale.set(pulse, pulse, pulse);
             
-            // Rotate Rings
-            ring1.rotation.x = Math.PI / 2; ring1.rotation.y = time * 0.2;
-            ring2.rotation.x = Math.PI / 2 + 0.5; ring2.rotation.y = -time * 0.15;
-            
-            // Rotate Satellites
-            orbiterGroup.rotation.y = time * 0.4;
-            orbiterGroup.rotation.z = Math.sin(time * 0.5) * 0.2;
-
-            // Animate Snow
-            const snowPositions = snowSystem.geometry.attributes.position.array;
-            for(let i=0; i<CONFIG.snowCount; i++) {
-                snowPositions[i*3+1] -= snowVel[i]; // move Y down
-                if(snowPositions[i*3+1] < -30) snowPositions[i*3+1] = 30; // reset to top
-            }
-            snowSystem.geometry.attributes.position.needsUpdate = true;
-
-            // Animate Meteors (Fly Across - Horizontal)
-            for(let i=0; i<CONFIG.meteorCount; i++) {
-                const md = meteorData[i];
-                md.x -= md.speed; // Move Left
-
-                if(md.x < -100) {
-                    md.x = 100;
-                    md.y = (Math.random() - 0.5) * 60;
-                }
-                
-                dummy.position.set(md.x, md.y, md.z);
-                dummy.rotation.z = 0; // Horizontal
-                dummy.scale.set(md.scale, 1, 1);
-                dummy.updateMatrix();
-                meteors.setMatrixAt(i, dummy.matrix);
-            }
-            meteors.instanceMatrix.needsUpdate = true;
-
-            // Camera Motion
-            if(STATE.mode === 'DISPERSED' && STATE.isHandDetected) {
+            if (STATE.mode === 'TEXT_XMAS') {
+                 scene.rotation.y = THREE.MathUtils.lerp(scene.rotation.y, 0, 0.05);
+            } else if (STATE.mode === 'DISPERSED' && STATE.isHandDetected) {
                 camera.position.x += (STATE.targetRotation.y * 40 - camera.position.x) * 0.05;
                 camera.position.y += (-STATE.targetRotation.x * 25 - camera.position.y) * 0.05;
                 camera.lookAt(0,0,0);
-            } else if(STATE.mode === 'TREE') {
+            } else {
                 scene.rotation.y = Math.sin(time * 0.2) * 0.2;
+            }
+
+            if(textHoloGroup.visible) {
+                textHoloGroup.lookAt(camera.position);
+                const s = 1 + Math.sin(time * 5) * 0.02; 
+                textHoloGroup.scale.set(s, s, s);
             }
 
             bloomPass.strength = 1.8 + Math.sin(time * 4) * 0.2;
@@ -677,7 +791,6 @@
         }
         animate();
 
-        // Upload
         document.getElementById('image-upload').addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if(!files.length) return;
