@@ -72,36 +72,53 @@
             text-shadow: 0 0 5px #ff00ff;
         }
 
-        /* Status Panel */
+        /* Status Panel - Thu nhỏ lại */
         .status-panel {
-            position: absolute; top: 120px; left: 30px;
-            background: rgba(5, 10, 20, 0.95);
-            border-left: 4px solid #00f3ff; padding: 20px 25px; 
+            position: absolute; top: 120px; left: 20px;
+            background: rgba(5, 10, 20, 0.85); /* Tăng độ trong suốt chút */
+            border-left: 3px solid #00f3ff; /* Viền mỏng hơn */
+            padding: 15px 20px; /* Giảm padding */
             pointer-events: auto; border-radius: 0 8px 8px 0;
-            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); min-width: 250px;
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); 
+            min-width: 220px; /* Giảm chiều rộng tối thiểu */
+            transform: scale(0.9); /* Thu nhỏ toàn bộ panel */
+            transform-origin: top left;
         }
 
-        .status-item { margin-bottom: 15px; font-size: 1rem; display: flex; align-items: center; color: #aaddff; font-weight: 500; }
+        .status-item { margin-bottom: 10px; font-size: 0.9rem; display: flex; align-items: center; color: #aaddff; font-weight: 500; }
         .status-value { color: #fff; margin-left: auto; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        .icon { margin-right: 10px; filter: drop-shadow(0 0 2px currentColor); }
+        .icon { margin-right: 8px; filter: drop-shadow(0 0 2px currentColor); }
         
+        /* New Input Styles - Nhỏ gọn hơn */
+        .input-group { margin-bottom: 8px; display: flex; flex-direction: column; }
+        .input-group label { font-size: 0.75rem; color: #00f3ff; margin-bottom: 2px; font-weight: bold; }
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-bottom: 2px solid #00f3ff;
+            color: #fff; padding: 4px 8px; font-family: 'Rajdhani', sans-serif; font-size: 0.85rem;
+            outline: none; transition: all 0.3s; width: 100%; box-sizing: border-box;
+        }
+        .cyber-input:focus { background: rgba(0, 243, 255, 0.1); border-color: #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+
         .upload-btn {
             background: linear-gradient(90deg, rgba(0, 243, 255, 0.2), transparent); 
-            border: 1px solid #00f3ff; color: #00f3ff; padding: 10px 15px; 
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem;
+            border: 1px solid #00f3ff; color: #00f3ff; padding: 8px 12px; 
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.8rem;
             cursor: pointer; transition: all 0.3s; text-transform: uppercase; width: 100%;
-            margin-top: 15px; pointer-events: auto; border-radius: 4px;
+            margin-top: 10px; pointer-events: auto; border-radius: 4px;
         }
         .upload-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 15px #00f3ff; }
 
+        /* Gesture Guide - Thu nhỏ lại */
         .gesture-guide {
-            position: absolute; bottom: 40px; right: 40px; 
+            position: absolute; bottom: 30px; right: 30px; 
             text-align: right; pointer-events: auto;
-            display: flex; flex-direction: column; gap: 8px;
+            display: flex; flex-direction: column; gap: 5px;
+            transform: scale(0.9); /* Thu nhỏ toàn bộ guide */
+            transform-origin: bottom right;
         }
         .guide-item {
-            background: rgba(0, 0, 0, 0.9); padding: 10px 20px; 
-            border-right: 4px solid #ff00ff; color: #fff; font-size: 0.9rem; font-weight: 600;
+            background: rgba(0, 0, 0, 0.8); padding: 8px 15px; 
+            border-right: 3px solid #ff00ff; color: #fff; font-size: 0.8rem; font-weight: 600;
             font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
             box-shadow: -5px 5px 15px rgba(0,0,0,0.5); border-radius: 4px 0 0 4px;
             transition: transform 0.2s;
@@ -134,8 +151,12 @@
         .btn-tech.visible { display: block; }
         #error-msg { color: #ff3366; margin-top: 15px; font-weight: bold; }
 
+        /* Webcam Preview - Giữ ở góc trên bên phải */
         #webcam-preview-container {
-            position: absolute; bottom: 30px; left: 30px; width: 180px; height: 135px;
+            position: absolute; 
+            top: 20px;   
+            right: 20px; 
+            width: 150px; height: 112px; /* Thu nhỏ webcam một chút */
             border: 2px solid #333; overflow: hidden; z-index: 20;
             pointer-events: auto; background: #000; border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
@@ -190,8 +211,26 @@
                 <span>CHẾ ĐỘ</span>
                 <span class="status-value" id="current-mode">HỘI TỤ</span>
             </div>
-            <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 15px 0;"></div>
-            <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #aaddff;">TẢI ẢNH KỶ NIỆM:</p>
+            
+            <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 8px 0;"></div>
+            
+            <!-- CUSTOM TEXT INPUTS -->
+            <p style="margin: 0 0 8px 0; font-size: 0.75rem; color: #aaddff; font-weight: bold;">TÙY CHỈNH LỜI CHÚC:</p>
+            <div class="input-group">
+                <label>✌️ 2 Ngón:</label>
+                <input type="text" id="text-2-fingers" value="XIN CHÀO" class="cyber-input" maxlength="20">
+            </div>
+            <div class="input-group">
+                <label>🤟 3 Ngón:</label>
+                <input type="text" id="text-3-fingers" value="NGUYỄN NGHĨA HLONG" class="cyber-input" maxlength="25">
+            </div>
+            <div class="input-group">
+                <label>🖖 4 Ngón (Xếp hạt):</label>
+                <input type="text" id="text-4-fingers" value="GIÁNG SINH VUI VẺ" class="cyber-input" maxlength="30">
+            </div>
+
+            <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 8px 0;"></div>
+            <p style="margin: 0 0 8px 0; font-size: 0.75rem; color: #aaddff;">TẢI ẢNH KỶ NIỆM:</p>
             <input type="file" id="image-upload" accept="image/*" multiple style="display: none;">
             <button class="upload-btn" onclick="document.getElementById('image-upload').click()">
                 📂 CHỌN ẢNH
@@ -200,9 +239,9 @@
 
         <div class="gesture-guide">
             <div class="guide-item">✊ 0-1 NGÓN : CÂY THÔNG</div>
-            <div class="guide-item">✌️ 2 NGÓN : XIN CHÀO</div>
-            <div class="guide-item">🤟 3 NGÓN : HIỆN TÊN</div>
-            <div class="guide-item special">🖖 4 NGÓN : GIÁNG SINH</div>
+            <div class="guide-item">✌️ 2 NGÓN : LỜI CHÚC 1</div>
+            <div class="guide-item">🤟 3 NGÓN : LỜI CHÚC 2</div>
+            <div class="guide-item special">🖖 4 NGÓN : LỜI CHÚC 3</div>
             <div class="guide-item">🖐 5 NGÓN : VŨ TRỤ</div>
         </div>
     </div>
@@ -249,10 +288,10 @@
                 red: 0xFF0033,     // Màu đỏ giáng sinh
                 neonBlue: 0x00ccff // Màu xanh dương mới cho chữ
             },
-            particles: { count: 6500, size: 0.1 }, 
+            particles: { count: 5500, size: 0.1 }, 
             tree: { height: 18, radius: 8 },
-            snowCount: 1200, 
-            meteorCount: 40
+            snowCount: 600, 
+            meteorCount: 20 
         };
 
         const STATE = {
@@ -260,6 +299,11 @@
             targetRotation: { x: 0, y: 0 },
             isHandDetected: false
         };
+
+        // --- VARIABLES FOR CUSTOM TEXT ---
+        let text2Fingers = "XIN CHÀO";
+        let text3Fingers = "NGUYỄN NGHĨA HLONG";
+        let text4Fingers = "GIÁNG SINH VUI VẺ";
 
         let isManualMode = false;
         let hands = null;
@@ -282,16 +326,16 @@
         const composer = new EffectComposer(renderer);
         composer.addPass(new RenderPass(scene, camera));
         
-        // Bloom Effect (Đã giảm chói)
+        // Bloom Effect (Đã giảm chói MẠNH)
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.2;  
-        bloomPass.strength = 0.6;   
-        bloomPass.radius = 0.3;     
+        bloomPass.threshold = 0.25; 
+        bloomPass.strength = 0.4;   
+        bloomPass.radius = 0.2;     
         composer.addPass(bloomPass);
 
         // --- BACKGROUND: NEBULA & STARS ---
         const starGeo = new THREE.BufferGeometry();
-        const starCount = 4000;
+        const starCount = 1500; 
         const starPos = new Float32Array(starCount * 3);
         for(let i=0; i<starCount; i++) {
             const r = 100 + Math.random() * 200;
@@ -307,7 +351,7 @@
         scene.add(starField);
 
         // --- NEBULA CLOUDS ---
-        const nebulaCount = 60;
+        const nebulaCount = 20; 
         const nebulaGeo = new THREE.BufferGeometry();
         const nebulaPos = new Float32Array(nebulaCount * 3);
         const nebulaColors = new Float32Array(nebulaCount * 3);
@@ -349,9 +393,9 @@
         const nebulaSystem = new THREE.Points(nebulaGeo, nebulaMat);
         scene.add(nebulaSystem);
 
-        // --- MILKY WAY BAND (DẢI NGÂN HÀ LỚN) ---
+        // --- MILKY WAY BAND ---
         function createMilkyWay() {
-            const count = 12000;
+            const count = 3000; 
             const geo = new THREE.BufferGeometry();
             const pos = new Float32Array(count * 3);
             const cols = new Float32Array(count * 3);
@@ -397,9 +441,9 @@
         }
         const milkyWaySystem = createMilkyWay();
 
-        // --- SPIRAL GALAXIES (THIÊN HÀ XOẮN ỐC) ---
+        // --- SPIRAL GALAXIES ---
         function createSpiralGalaxy(radius, color, x, y, z, rotX, rotY) {
-            const pointsCount = 800; 
+            const pointsCount = 300; 
             const geo = new THREE.BufferGeometry();
             const pos = new Float32Array(pointsCount * 3);
             const cols = new Float32Array(pointsCount * 3);
@@ -445,7 +489,7 @@
         const galaxies = [];
         const galaxyColors = [CONFIG.colors.cyan, CONFIG.colors.purple, CONFIG.colors.green, CONFIG.colors.magenta, CONFIG.colors.lime, CONFIG.colors.orange, CONFIG.colors.deepBlue, CONFIG.colors.core];
 
-        for(let i=0; i<25; i++) {
+        for(let i=0; i<8; i++) {
             const radius = 8 + Math.random() * 15; 
             const color = galaxyColors[Math.floor(Math.random() * galaxyColors.length)];
             const dist = 90 + Math.random() * 80; 
@@ -464,7 +508,7 @@
         }
         scene.add(galaxyGroup);
 
-        // --- CYBER SANTA & REINDEER (3D SOLID) ---
+        // --- CYBER SANTA & REINDEER ---
         const santaGroup = new THREE.Group();
         scene.add(santaGroup);
 
@@ -571,38 +615,56 @@
         }
         createCyberSanta();
 
-        // --- TEXT PARTICLES ---
+        // --- UPDATED TEXT PARTICLES FUNCTION (FRAMED + HORIZONTAL) ---
         function generateTextParticles(textFull) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 2000; canvas.height = 500;
+            // Canvas rộng để chứa chữ hàng ngang
+            canvas.width = 2200; 
+            canvas.height = 600;
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // 1. Vẽ Khung (Frame)
             ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
             ctx.lineWidth = 20;
+            // Vẽ khung chữ nhật
             ctx.strokeRect(100, 50, canvas.width - 200, canvas.height - 100);
 
+            // 2. Trang trí góc (Decorations)
             ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            const decorSize = 30;
+            const decorSize = 25;
             ctx.beginPath(); ctx.arc(100, 50, decorSize, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(canvas.width - 100, 50, decorSize, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(100, canvas.height - 50, decorSize, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(canvas.width - 100, canvas.height - 50, decorSize, 0, Math.PI * 2); ctx.fill();
 
-            ctx.font = 'bold 180px "Playball", cursive'; 
+            // 3. Vẽ Chữ (Text) - 1 Hàng Ngang
+            // Tự động điều chỉnh size chữ nếu quá dài
+            let fontSize = 180;
+            if(textFull.length > 15) fontSize = 140;
+            if(textFull.length > 20) fontSize = 110;
+
+            ctx.font = `bold ${fontSize}px "Playball", cursive`; 
             ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+            
+            // Vẽ chữ vào chính giữa
             ctx.fillText(textFull, canvas.width / 2, canvas.height / 2);
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             const points = [];
+            
+            // Scan điểm ảnh
             const step = 5; 
             for (let y = 0; y < canvas.height; y += step) {
                 for (let x = 0; x < canvas.width; x += step) {
                     const index = (y * canvas.width + x) * 4;
                     if (data[index + 3] > 128) { 
                         points.push({
+                            // Scale nhỏ lại để vừa màn hình 3D
                             x: (x - canvas.width / 2) * 0.035, 
                             y: (canvas.height / 2 - y) * 0.035, 
                             z: 0 
@@ -613,7 +675,7 @@
             return points;
         }
 
-        const xmasPoints = generateTextParticles("Giáng Sinh Vui Vẻ");
+        let xmasPoints = generateTextParticles(text4Fingers);
 
         // --- MAIN OBJECTS ---
         const gridHelper = new THREE.GridHelper(200, 40, CONFIG.colors.cyan, 0x111111);
@@ -649,8 +711,11 @@
             const zG = rG * Math.cos(phiG);
 
             let xText, yText, zText;
+            let isText = false;
+            
             if (i < xmasPoints.length) {
                 xText = xmasPoints[i].x; yText = xmasPoints[i].y; zText = xmasPoints[i].z;
+                isText = true;
             } else {
                 const angle = Math.random() * Math.PI * 2;
                 const rad = 40 + Math.random() * 20; 
@@ -681,7 +746,7 @@
                 currPos: new THREE.Vector3(xTree, yTree, zTree),
                 originalColor: color.clone(),
                 rotationSpeed: Math.random() * 0.1,
-                isTextParticle: i < xmasPoints.length
+                isTextParticle: isText
             });
             
             dummy.position.set(xTree, yTree, zTree);
@@ -885,7 +950,7 @@
                 if(STATE.mode !== 'TEXT_HELLO') {
                     STATE.mode = 'TEXT_HELLO';
                     document.getElementById('current-mode').innerText = "MSG: HELLO";
-                    updateHoloText("XIN CHÀO", "#FFD700"); 
+                    updateHoloText(text2Fingers, "#FFD700"); 
                     textHoloGroup.visible = true;
                     setMode('TREE'); 
                     triggerGlitch();
@@ -895,7 +960,7 @@
                 if(STATE.mode !== 'TEXT_NAME') {
                     STATE.mode = 'TEXT_NAME';
                     document.getElementById('current-mode').innerText = "MSG: ID";
-                    updateHoloText("NGUYỄN NGHĨA HLONG", "#00F3FF"); 
+                    updateHoloText(text3Fingers, "#00F3FF"); 
                     textHoloGroup.visible = true;
                     setMode('TREE');
                     triggerGlitch();
@@ -948,8 +1013,14 @@
                     .onUpdate(() => {
                         dummy.position.copy(p.currPos);
                         dummy.rotation.x += p.rotationSpeed; dummy.rotation.y += p.rotationSpeed;
-                        if (mode === 'TEXT_XMAS' && p.isTextParticle) dummy.scale.setScalar(1.2); 
-                        else dummy.scale.setScalar(Math.random() * 0.8 + 0.2);
+                        
+                        // Tăng kích thước hạt chữ (scale) khi ở chế độ TEXT_XMAS
+                        if (mode === 'TEXT_XMAS' && p.isTextParticle) {
+                            dummy.scale.setScalar(1.5); // Tăng kích thước hạt chữ
+                        } else {
+                            dummy.scale.setScalar(Math.random() * 0.8 + 0.2);
+                        }
+
                         dummy.updateMatrix();
                         p.mesh.setMatrixAt(p.index, dummy.matrix);
                     }).start();
@@ -997,31 +1068,45 @@
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
+            
+            // Lấy khoảng thời gian giữa 2 khung hình (seconds)
+            const delta = clock.getDelta(); 
+            const time = clock.getElapsedTime(); // Tổng thời gian chạy
+            
             TWEEN.update();
 
+            // Xử lý xoay khung lưới (Sử dụng delta để làm mượt hàm lerp)
             if (STATE.mode === 'TEXT_XMAS') {
-                mesh1.rotation.y = THREE.MathUtils.lerp(mesh1.rotation.y, 0, 0.05);
-                mesh2.rotation.y = THREE.MathUtils.lerp(mesh2.rotation.y, 0, 0.05);
+                // Công thức damping độc lập khung hình: 1 - exp(-speed * delta)
+                const damp = 1 - Math.exp(-3 * delta); 
+                mesh1.rotation.y = THREE.MathUtils.lerp(mesh1.rotation.y, 0, damp);
+                mesh2.rotation.y = THREE.MathUtils.lerp(mesh2.rotation.y, 0, damp);
             } else {
                 mesh1.rotation.y = time * 0.1; 
                 mesh2.rotation.y = time * -0.05;
             }
 
             gridHelper.position.z = (time * 5) % 40; 
+            
             coreMesh.rotation.x = time * 0.5; coreMesh.rotation.y = time * 0.3;
             const pulse = 1 + Math.sin(time * 3) * 0.2;
             coreMesh.scale.set(pulse, pulse, pulse);
 
-            // Animate Santa
+            // --- ANIMATE SANTA & REINDEER (SMOOTH MOVEMENT) ---
             if (santaGroup) {
-                santaGroup.position.x += 0.4; 
+                // Tốc độ di chuyển tính theo giây (ví dụ: 25 đơn vị/giây)
+                const moveSpeed = 25; 
+                santaGroup.position.x += moveSpeed * delta; 
+                
+                // Các chuyển động dạng sóng (Sine) dùng thời gian thực nên luôn mượt
                 santaGroup.position.y = 5 + Math.sin(time * 1.0) * 4;
                 santaGroup.rotation.z = Math.sin(time * 1.0) * 0.1; 
+                
                 if (santaGroup.position.x > 100) {
                     santaGroup.position.x = -100;
                     santaGroup.position.y = Math.random() * 10 - 5;
                 }
+
                 santaGroup.children.forEach(child => {
                     if (child.userData.isReindeer) {
                         child.position.y = Math.sin(time * 12 + child.userData.offset) * 0.3;
@@ -1034,26 +1119,35 @@
                 });
             }
 
+            // --- ANIMATE COSMIC RINGS (SMOOTH ROTATION) ---
             cosmicRings.forEach(ring => {
-                ring.rotation.x += ring.userData.rotX * 0.01;
-                ring.rotation.y += ring.userData.rotY * 0.01;
-                ring.rotation.z += ring.userData.rotZ * 0.01;
+                // Nhân với delta để tốc độ xoay đều đặn
+                ring.rotation.x += ring.userData.rotX * 0.5 * delta;
+                ring.rotation.y += ring.userData.rotY * 0.5 * delta;
+                ring.rotation.z += ring.userData.rotZ * 0.5 * delta;
             });
 
-            galaxies.forEach(g => { g.rotation.z += g.userData.rotSpeedZ; });
+            // --- ANIMATE GALAXIES ---
+            galaxies.forEach(g => { 
+                // Điều chỉnh tốc độ (nhân 60 để tương đương tốc độ cũ ở 60fps)
+                g.rotation.z += g.userData.rotSpeedZ * 60 * delta; 
+            });
             nebulaSystem.rotation.y = time * 0.02;
             if(milkyWaySystem) milkyWaySystem.rotation.y = time * 0.005;
 
+            // --- ANIMATE SNOW (SMOOTH FALL) ---
             const snowPositions = snowSystem.geometry.attributes.position.array;
             for(let i=0; i<CONFIG.snowCount; i++) {
-                snowPositions[i*3+1] -= snowVel[i]; 
+                // Rơi mượt mà theo thời gian thực
+                snowPositions[i*3+1] -= snowVel[i] * 60 * delta; 
                 if(snowPositions[i*3+1] < -30) snowPositions[i*3+1] = 30; 
             }
             snowSystem.geometry.attributes.position.needsUpdate = true;
 
+            // --- ANIMATE METEORS (SMOOTH FLY) ---
             for(let i=0; i<CONFIG.meteorCount; i++) {
                 const md = meteorData[i];
-                md.x -= md.speed; 
+                md.x -= md.speed * 60 * delta; 
                 if(md.x < -100) {
                     md.x = 100;
                     md.y = (Math.random() - 0.5) * 60;
@@ -1066,11 +1160,18 @@
             }
             meteors.instanceMatrix.needsUpdate = true;
             
+            // --- CAMERA SMOOTH DAMPING ---
             if (STATE.mode === 'TEXT_XMAS') {
-                 scene.rotation.y = THREE.MathUtils.lerp(scene.rotation.y, 0, 0.05);
+                 const damp = 1 - Math.exp(-2 * delta);
+                 scene.rotation.y = THREE.MathUtils.lerp(scene.rotation.y, 0, damp);
             } else if (STATE.mode === 'DISPERSED' && STATE.isHandDetected) {
-                camera.position.x += (STATE.targetRotation.y * 40 - camera.position.x) * 0.05;
-                camera.position.y += (-STATE.targetRotation.x * 25 - camera.position.y) * 0.05;
+                const damp = 1 - Math.exp(-3 * delta);
+                // Nội suy vị trí camera mượt hơn
+                const targetX = STATE.targetRotation.y * 40;
+                const targetY = -STATE.targetRotation.x * 25;
+                
+                camera.position.x += (targetX - camera.position.x) * damp;
+                camera.position.y += (targetY - camera.position.y) * damp;
                 camera.lookAt(0,0,0);
             } else {
                 scene.rotation.y = Math.sin(time * 0.2) * 0.2;
@@ -1082,11 +1183,48 @@
                 textHoloGroup.scale.set(s, s, s);
             }
 
-            bloomPass.strength = 0.6 + Math.sin(time * 4) * 0.1;
+            // Bloom nhẹ nhàng
+            bloomPass.strength = 0.4 + Math.sin(time * 4) * 0.05;
             mesh1.instanceMatrix.needsUpdate = true; mesh2.instanceMatrix.needsUpdate = true;
             composer.render();
         }
         animate();
+
+        // --- LISTENERS FOR CUSTOM TEXT ---
+        document.getElementById('text-2-fingers').addEventListener('input', (e) => {
+            text2Fingers = e.target.value || " ";
+            if(STATE.mode === 'TEXT_HELLO') updateHoloText(text2Fingers, "#FFD700");
+        });
+
+        document.getElementById('text-3-fingers').addEventListener('input', (e) => {
+            text3Fingers = e.target.value || " ";
+            if(STATE.mode === 'TEXT_NAME') updateHoloText(text3Fingers, "#00F3FF");
+        });
+
+        document.getElementById('text-4-fingers').addEventListener('change', (e) => {
+            text4Fingers = e.target.value || " ";
+            // Recalculate particle text points
+            xmasPoints = generateTextParticles(text4Fingers);
+            
+            // Re-assign text positions to particles
+            particles.forEach((p, i) => {
+                if (i < xmasPoints.length) {
+                    p.textPos.set(xmasPoints[i].x, xmasPoints[i].y, xmasPoints[i].z);
+                    p.isTextParticle = true;
+                } else {
+                    // Send unused particles to background
+                    const angle = Math.random() * Math.PI * 2;
+                    const rad = 40 + Math.random() * 20; 
+                    p.textPos.set(Math.cos(angle) * rad, (Math.random() - 0.5) * 40, -30 + Math.random() * 10);
+                    p.isTextParticle = false;
+                }
+            });
+
+            // If currently in Xmas mode, trigger update
+            if(STATE.mode === 'TEXT_XMAS') {
+                setMode('TEXT_XMAS'); // Re-trigger tween
+            }
+        });
 
         document.getElementById('image-upload').addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
